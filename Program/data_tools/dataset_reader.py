@@ -27,4 +27,5 @@ class DatasetReader:
         :return: numpy row-oriented data array
         """
         data = genfromtxt(self.path + os.sep + filename, delimiter=',', skip_header=0)
-        return np.asarray(data)
+        data = np.asarray(data)
+        return np.delete(data, 0, 1)

@@ -49,15 +49,8 @@ class BalancedTree(BinaryTree):
         if self._root is None:
             raise ValueError('Tree has not yet been constructed. Root does not exist.')
 
-        correct_classes = []
-
-        for pattern in patterns:
-            correct_classes.append(self._classify_pattern(pattern))
-
+        correct_classes = [BalancedTree._classify_traverse(self._root, pattern) for pattern in patterns]
         return np.asarray(correct_classes)
-
-    def _classify_pattern(self, pattern):
-        return BalancedTree._classify_traverse(self._root, pattern)
 
     @staticmethod
     def _classify_traverse(node, pattern):
