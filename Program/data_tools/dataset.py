@@ -12,25 +12,18 @@ class Dataset:
         :param data: numpy array containing row-oriented data with first column being class labels
         :param division_ratio: training to test data division ratio
         """
-        self.training_labels = []
-        self.test_labels = []
-
         row_count = data.shape[0]
         training_data = data[:int(row_count * division_ratio), :]
         test_data = data[int(row_count * division_ratio):, :]
-
-        for row in training_data:
-            self.training_labels.append(row[0])
-        for row in test_data:
-            self.test_labels.append(row[0])
-
+        self.training_labels = [row[0] for row in training_data]
+        self.test_labels = [row[0] for row in test_data]
         self.training_data = np.delete(training_data, 0, 1)
         self.test_data = np.delete(test_data, 0, 1)
 
     def get_classes_distribution(self):
         """
         Calculates classes distribution for each data set. Evenly distributed classes help in training and testing
-        classifiers.
+        models.
         :return: array for training data and array for test data
         """
         training_classes_count = np.amax(self.training_labels) - np.amin(self.training_labels) + 1

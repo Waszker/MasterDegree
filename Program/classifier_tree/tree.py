@@ -10,7 +10,11 @@ class BinaryTree:
         self._root = None
 
     @abstractmethod
-    def build_tree(self, patterns):
+    def build(self, labels, patterns):
+        pass
+
+    @abstractmethod
+    def show(self):
         pass
 
     @abstractmethod
@@ -32,4 +36,4 @@ class Node:
     def __init__(self):
         self.left = self.right = None
         self.classifier = None
-        self.classes_left = self.classes_right = []
+        self.classes = self.classes_left = self.classes_right = []

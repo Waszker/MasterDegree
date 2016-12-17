@@ -11,7 +11,11 @@ class Normalizer:
         self.difference_vector = self.max_vector - self.min_vector
 
     def get_normalized_data_matrix(self, data):
-        # TODO: Add description to method
+        """
+        Normalizes data to [0, 1] values. Deletes columns that are always zero.
+        :param data: numpy array, row-oriented data
+        :return: normalized data without 'zero columns'
+        """
         new_data = np.asarray(data)
 
         for row in new_data:
