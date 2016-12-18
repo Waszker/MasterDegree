@@ -21,10 +21,6 @@ class BinaryTree:
     def classify_patterns(self, patterns):
         pass
 
-    @abstractmethod
-    def _classify_pattern(self, pattern):
-        pass
-
 
 class Node:
     """

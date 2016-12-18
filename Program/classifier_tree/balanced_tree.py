@@ -38,6 +38,8 @@ class BalancedTree(BinaryTree):
         """
         Displays tree nodes and their corresponding classes.
         """
+        if self._root is None:
+            raise ValueError('Tree has not yet been constructed. Root does not exist.')
         BalancedTree._show_tree_node(self._root, 0)
 
     def classify_patterns(self, patterns):
@@ -67,7 +69,7 @@ class BalancedTree(BinaryTree):
 
     def _create_tree_node(self, central_points, labels, patterns):
         """
-        Creates BalancedTree node.
+        Creates BalancedTree node with classifier trained on node.left_classes vs. node.right_classes data.
         :param central_points: dictionary containing class:central_point data
         :param labels: list of correct data classes for each pattern array row
         :param patterns: row-oriented numpy array containing data for classifier training

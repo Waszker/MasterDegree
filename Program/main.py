@@ -2,6 +2,7 @@ import numpy as np
 from data_tools.dataset_reader import DatasetReader
 from data_tools.dataset import Dataset
 from classifier_tree.balanced_tree import BalancedTree
+from classifier_tree.slanting_tree import SlantingTree
 
 
 def get_result_matrix(tree, patterns, labels, matrix_size):
@@ -15,6 +16,25 @@ def get_result_matrix(tree, patterns, labels, matrix_size):
     return result_matrix
 
 
+def run_balanced_tree_test(digits_data, letters):
+    t = BalancedTree(classification_method=("svm", None), clustering_method=("kmeans", None))
+    t.build(digits_data.training_labels, digits_data.training_data)
+    t.show()
+
+    print str(get_result_matrix(t, digits_data.training_data, digits_data.training_labels, (10, 10))) + str("\n\n")
+    print str(get_result_matrix(t, digits_data.test_data, digits_data.test_labels, (10, 10))) + str("\n\n")
+    print get_result_matrix(t, letters, [10] * letters.shape[0], (10, 10))
+
+
+def run_slanting_tree_test(digits_data, letters):
+    t = SlantingTree(classification_method=("svm", None))
+    t.build(digits_data.training_labels, digits_data.training_data)
+    t.show()
+
+    print str(get_result_matrix(t, digits_data.training_data, digits_data.training_labels, (10, 10))) + str("\n\n")
+    print str(get_result_matrix(t, digits_data.test_data, digits_data.test_labels, (10, 10))) + str("\n\n")
+    print get_result_matrix(t, letters, [10] * letters.shape[0], (10, 10))
+
 if __name__ == "__main__":
     """
     Main program entry function.
@@ -24,10 +44,6 @@ if __name__ == "__main__":
     data = Dataset(raw_data, division_ratio=0.70)
     raw_data = reader.read_letters()
 
-    t = BalancedTree(classification_method=("svm", None), clustering_method=("kmeans", None))
-    t.build(data.training_labels, data.training_data)
-    t.show()
+    run_balanced_tree_test(data, raw_data)
+    run_slanting_tree_test(data, raw_data)
 
-    print str(get_result_matrix(t, data.training_data, data.training_labels, (10, 10))) + str("\n\n")
-    print str(get_result_matrix(t, data.test_data, data.test_labels, (10, 10))) + str("\n\n")
-    print get_result_matrix(t, raw_data, [10] * raw_data.shape[0], (10, 10))
