@@ -1,6 +1,7 @@
 import numpy as np
 from data_tools.dataset_reader import DatasetReader
 from data_tools.dataset import Dataset
+from data_tools.normalization import Normalizer
 from classifier_tree.balanced_tree import BalancedTree
 from classifier_tree.slanting_tree import SlantingTree
 
@@ -42,7 +43,11 @@ if __name__ == "__main__":
     reader = DatasetReader("../Datasets")
     raw_data = reader.read_digits(filename='digits.csv')
     data = Dataset(raw_data, division_ratio=0.70)
+    normalizer = Normalizer(data.training_data)
+    data.training_data = normalizer.get_normalized_data_matrix(data.training_data)
+    data.test_data = normalizer.get_normalized_data_matrix(data.test_data)
     raw_data = reader.read_letters()
+    raw_data = normalizer.get_normalized_data_matrix(raw_data)
 
     run_balanced_tree_test(data, raw_data)
     run_slanting_tree_test(data, raw_data)
