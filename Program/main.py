@@ -27,7 +27,8 @@ def run_balanced_tree_test(digits_data, letters_data, classifier, classifier_par
     foreign_matrix = get_result_matrix(t, letters_data, [10] * letters_data.shape[0], (10, 10))
 
     filename = "../Results/balanced_tree " + str(classifier) + "_" + str(classifier_parameters) + ".csv"
-    np.savetxt(filename, np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0), delimiter=',')
+    np.savetxt(filename, np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0), delimiter=',',
+               fmt='%i')
 
 
 def run_slanting_tree_test(digits_data, letters_data, classifier, classifier_parameters):
@@ -39,7 +40,8 @@ def run_slanting_tree_test(digits_data, letters_data, classifier, classifier_par
     foreign_matrix = get_result_matrix(t, letters_data, [10] * letters_data.shape[0], (10, 10))
 
     filename = "../Results/slanting_tree " + str(classifier) + "_" + str(classifier_parameters) + ".csv"
-    np.savetxt(filename, np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0), delimiter=',')
+    np.savetxt(filename, np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0), delimiter=',',
+               fmt='%i')
 
 
 def run_tests(digits_data, letters_data):
@@ -59,19 +61,19 @@ def run_tests(digits_data, letters_data):
     pool = mp.Pool()
 
     for classifier, parameters_dict in classifiers.iteritems():
-        pool.apply_async(traverse_parameters_run_test,
-                         args=(classifier, parameters_dict, {}, digits_data, letters_data))
+        traverse_parameters_run_test(pool, classifier, parameters_dict, {}, digits_data, letters_data)
+
     pool.close()
     pool.join()
 
 
-def traverse_parameters_run_test(classifier, parameters_dict, parameters, digits_data, letters_data):
+def traverse_parameters_run_test(pool, classifier, parameters_dict, parameters, digits_data, letters_data):
     current_level = len(parameters)
 
     if current_level == len(parameters_dict):
         print "Running tests for classifier " + str(classifier) + " with parameters " + str(parameters)
-        run_balanced_tree_test(digits_data, letters_data, classifier, parameters)
-        run_slanting_tree_test(digits_data, letters_data, classifier, parameters)
+        pool.apply_async(run_balanced_tree_test, args=(digits_data, letters_data, classifier, parameters))
+        pool.apply_async(run_slanting_tree_test, args=(digits_data, letters_data, classifier, parameters))
         return
 
     parameter_name = parameters_dict.keys()[current_level]
@@ -79,7 +81,7 @@ def traverse_parameters_run_test(classifier, parameters_dict, parameters, digits
 
     for value in parameter_values:
         parameters[parameter_name] = value
-        traverse_parameters_run_test(classifier, parameters_dict, parameters, digits_data, letters_data)
+        traverse_parameters_run_test(pool, classifier, parameters_dict, parameters, digits_data, letters_data)
         del parameters[parameter_name]
 
 
