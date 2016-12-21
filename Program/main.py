@@ -59,7 +59,6 @@ def run_tests(digits_data, letters_data):
     pool = mp.Pool()
 
     for classifier, parameters_dict in classifiers.iteritems():
-        traverse_parameters_run_test(classifier, parameters_dict, {}, digits_data, letters_data)
         pool.apply_async(traverse_parameters_run_test,
                          args=(classifier, parameters_dict, {}, digits_data, letters_data))
     pool.close()
