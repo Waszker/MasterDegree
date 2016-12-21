@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from Program.models import classifiers
+from models import classifiers
 from tree import BinaryTree, Node
 
 

@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from random import randint
 from balanced_tree import BinaryTree, Node
-from Program.models import classifiers
+from models import classifiers
 
 
 class SlantingTree(BinaryTree):
