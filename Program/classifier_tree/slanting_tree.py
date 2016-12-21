@@ -134,12 +134,20 @@ class SlantingTree(BinaryTree):
             else:
                 foreign_samples.append(p)
 
+        if len(native_samples) <= 10:
+            native_samples = [p for i, p in enumerate(dataset) if labels[i] == 1]
+            native_samples = native_samples[:len(native_samples) / 2]
+        if len(foreign_samples) <= 10:
+            foreign_samples = [p for i, p in enumerate(dataset) if labels[i] == 0]
+            foreign_samples = foreign_samples[:len(foreign_samples) / 2]
+
         return native_samples, foreign_samples
 
     @staticmethod
     def _generate_new_samples(native_samples, foreign_samples, proper_class_count, method_number):
         """
         Creates new, artificial patterns from correctly classified native ones and wrongly classified foreign ones.
+        Both samples lists must not be empty!
         There are few approaches towards this problem:
             1) For randomly selected pattern apply gaussian distortion vector
         :param native_samples: patterns from native class that were correctly classified
@@ -149,7 +157,7 @@ class SlantingTree(BinaryTree):
         :return: newly created classes
         """
         native_count, foreign_count = len(native_samples), len(foreign_samples)
-        # TODO: What if any of the counts is zero?
+
         for i in range(native_count, proper_class_count):
             native_samples.append(SlantingTree._apply_gaussian_distortion(native_samples[randint(0, native_count - 1)]))
         for i in range(foreign_count, proper_class_count):

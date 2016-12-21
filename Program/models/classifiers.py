@@ -11,10 +11,10 @@ def clustering_object((clustering_method, parameters)):
     """
     try:
         return {
-            'spectral': _get_spectral(parameters),
-            'dbscan': _get_dbscan(parameters),
-            'kmeans': _get_kmeans(parameters)
-        }[clustering_method]
+            'spectral': _get_spectral,
+            'dbscan': _get_dbscan,
+            'kmeans': _get_kmeans
+        }[clustering_method](parameters)
     except KeyError:
         raise ValueError('Provided clustering method name \'' + str(clustering_method) + '\' not recognized.')
 
@@ -26,10 +26,10 @@ def classifier_object((classification_method, parameters)):
     """
     try:
         return {
-            'svm': _get_svm(parameters),
-            'rf': _get_rf(parameters),
-            'knn': _get_knn(parameters),
-        }[classification_method]
+            'svm': _get_svm,
+            'rf': _get_rf,
+            'knn': _get_knn
+        }[classification_method](parameters)
     except KeyError:
         raise ValueError('Provided classifier name \'' + str(classification_method) + '\' not recognized.')
 
