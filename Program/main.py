@@ -13,12 +13,13 @@ def get_result_matrix(tree, patterns, labels, matrix_size):
     for i, r in enumerate(result_list):
         if r == -1:
             r = matrix_size[1]
-        result_matrix[labels[i]][r] += 1
+        result_matrix[int(labels[i])][r] += 1
 
     return result_matrix
 
 
 def run_balanced_tree_test(digits_data, letters_data, classifier, classifier_parameters):
+    print "BalancedTree tests for classifier " + str(classifier) + " with parameters " + str(classifier_parameters)
     t = BalancedTree(classification_method=(classifier, classifier_parameters), clustering_method=("kmeans", None))
     t.build(digits_data.training_labels, digits_data.training_data)
 
@@ -32,6 +33,7 @@ def run_balanced_tree_test(digits_data, letters_data, classifier, classifier_par
 
 
 def run_slanting_tree_test(digits_data, letters_data, classifier, classifier_parameters):
+    print "SlantingTree tests for classifier " + str(classifier) + " with parameters " + str(classifier_parameters)
     t = SlantingTree(classification_method=(classifier, classifier_parameters))
     t.build(digits_data.training_labels, digits_data.training_data)
 
@@ -71,9 +73,8 @@ def traverse_parameters_run_test(pool, classifier, parameters_dict, parameters, 
     current_level = len(parameters)
 
     if current_level == len(parameters_dict):
-        print "Running tests for classifier " + str(classifier) + " with parameters " + str(parameters)
-        pool.apply_async(run_balanced_tree_test, args=(digits_data, letters_data, classifier, parameters))
-        pool.apply_async(run_slanting_tree_test, args=(digits_data, letters_data, classifier, parameters))
+        pool.apply_async(run_balanced_tree_test, args=(digits_data, letters_data, classifier, dict(parameters)))
+        pool.apply_async(run_slanting_tree_test, args=(digits_data, letters_data, classifier, dict(parameters)))
         return
 
     parameter_name = parameters_dict.keys()[current_level]
