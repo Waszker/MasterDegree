@@ -54,7 +54,7 @@ def run_tests(digits_data, letters_data):
             'gamma': [pow(2, -1), pow(2, -2), pow(2, -3)]
         },
         "knn": {
-            'n_neighbors': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            'n_neighbors': [3, 5, 7, 10],
         },
         "rf": {
             'n_estimators': [30, 50, 100, 150]
