@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 from random import randint
-from balanced_tree import BinaryTree, Node
+from tree import BinaryTree, Node
 from models import classifiers
 
 
@@ -22,7 +22,13 @@ class SlantingTree(BinaryTree):
         self._point_generation_method = point_generation_method
 
     def build(self, labels, patterns):
-        # TODO: Add method description
+        # TODO: Finish method description
+        """
+        Builds tree and trains classifiers in each node.
+        :param labels:
+        :param patterns:
+        :return:
+        """
         classes = set(int(l) for l in labels)
         patterns_by_class = {k: [p for i, p in enumerate(patterns) if labels[i] == k] for k in classes}
         self._root = self._create_tree_node(list(classes), patterns_by_class)
