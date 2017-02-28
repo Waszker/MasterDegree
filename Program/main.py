@@ -52,7 +52,6 @@ def run_slanting_tree_test(digits_data, letters_data, classifier, classifier_par
 
 def run_slanting_dual_tree_test(digits_data, letters_data, node_classifier, node_classifier_parameters, leaf_classifier,
                                 leaf_classifier_parameters):
-    # TODO: Add leaf classifier parameter
     print "SlantingDualTree tests for node classifier " + str(node_classifier) + " with parameters " + str(
         node_classifier_parameters) + " and leaf classifier " + str(leaf_classifier) + " with parameters " + str(
         leaf_classifier_parameters)

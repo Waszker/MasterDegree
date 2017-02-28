@@ -10,6 +10,8 @@
 \usepackage[square, numbers, comma, sort&compress]{natbib}  % Use the "Natbib" style for the references in the Bibliography
 \usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
 \usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
+\usepackage{multirow}
+\usepackage[table,xcdraw]{xcolor}
 \hypersetup{urlcolor=blue, colorlinks=true}  % Colours hyperlinks in blue, but this can be distracting if there are many links.
 
 %% ----------------------------------------------------------------
@@ -130,46 +132,42 @@ The acknowledgements and the people to thank go here, don't forget to include yo
 
 %% ----------------------------------------------------------------
 \setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
-\clearpage  % Start a new page
-\lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
-\listofsymbols{ll}  % Include a list of Abbreviations (a table of two columns)
-{
+% \clearpage  % Start a new page
+% \lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
+% \listofsymbols{ll}  % Include a list of Abbreviations (a table of two columns)
+% {
 % \textbf{Acronym} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or \\
-\textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere \\
-
-}
+% \textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere \\
+% }
 
 %% ----------------------------------------------------------------
-\clearpage  % Start a new page
-\lhead{\emph{Physical Constants}}  % Set the left side page header to "Physical Constants"
-\listofconstants{lrcl}  % Include a list of Physical Constants (a four column table)
-{
+% \clearpage  % Start a new page
+% \lhead{\emph{Physical Constants}}  % Set the left side page header to "Physical Constants"
+% \listofconstants{lrcl}  % Include a list of Physical Constants (a four column table)
+% {
 % Constant Name & Symbol & = & Constant Value (with units) \\
-Speed of Light & $c$ & $=$ & $2.997\ 924\ 58\times10^{8}\ \mbox{ms}^{-\mbox{s}}$ (exact)\\
-
-}
+% Speed of Light & $c$ & $=$ & $2.997\ 924\ 58\times10^{8}\ \mbox{ms}^{-\mbox{s}}$ (exact)\\
+% }
 
 %% ----------------------------------------------------------------
-\clearpage  %Start a new page
-\lhead{\emph{Symbols}}  % Set the left side page header to "Symbols"
-\listofnomenclature{lll}  % Include a list of Symbols (a three column table)
-{
+% \clearpage  %Start a new page
+% \lhead{\emph{Symbols}}  % Set the left side page header to "Symbols"
+% \listofnomenclature{lll}  % Include a list of Symbols (a three column table)
+% {
 % symbol & name & unit \\
-$a$ & distance & m \\
-$P$ & power & W (Js$^{-1}$) \\
-& & \\ % Gap to separate the Roman symbols from the Greek
-$\omega$ & angular frequency & rads$^{-1}$ \\
-}
+% $a$ & distance & m \\
+% $P$ & power & W (Js$^{-1}$) \\
+% & & \\ % Gap to separate the Roman symbols from the Greek
+% $\omega$ & angular frequency & rads$^{-1}$ \\
+% }
 %% ----------------------------------------------------------------
 % End of the pre-able, contents and lists of things
 % Begin the Dedication page
 
-\setstretch{1.3}  % Return the line spacing back to 1.3
-
-\pagestyle{empty}  % Page style needs to be empty for this page
-\dedicatory{For/Dedicated to/To my\ldots}
-
-\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+% \setstretch{1.3}  % Return the line spacing back to 1.3
+% \pagestyle{empty}  % Page style needs to be empty for this page
+% \dedicatory{For/Dedicated to/To my\ldots}
+% \addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
 
 
 %% ----------------------------------------------------------------
@@ -183,7 +181,9 @@ $\omega$ & angular frequency & rads$^{-1}$ \\
 
 \input{Chapters/Chapter2} % Background Theory 
 
-\input{Chapters/Chapter3} % Experimental Setup
+\input{Chapters/QualityEvaluation} % Experimental Setup
+
+\input{Chapters/ClassifierTrees} % Experimental Setup
 
 %\input{Chapters/Chapter4} % Experiment 1
 
