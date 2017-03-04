@@ -6,7 +6,7 @@ Common classifiers described in the Chapter \ref{common_classifiers} return resu
 
 \subsection{Description}
 
-Balanced Tree structure utilises clustering algorithms for its creation. It is usually shaped as a balanced binary tree, thus the name, with classifier in each of its nodes. Each node represents a set of classes that are currently taken into consideration as native ones for provided pattern. By traversing down the tree certain classes get rejected and the pattern is moved forward to the next node that represents only remaining classes. Decision as to which classes should be put in each of the child nodes is made by clustering algorithm that divides set of remaining classes from parent node into two and assigns each part for each child node. If there's only one remaining class, tree leaf is created instead. Each node, except for leafs, contains binary classifier trained on data that is based on clustering algorithm results. What it mean is that patterns from training data set, that belong to classes dedicated for left child node, are joined together and are treated as one big class '0'. The same goes for patterns that belong to the right child node, except for the class number which is '1'. By having two, new data sets that represent two different classes, the parent node can finally create binary classifier. During classification procedure, after receiving new, unknown pattern each node uses its classifier to assign either '0' or '1' label to this pattern, which is then used to send it to left or right child accordingly for further classification. Balanced Tree leafs also utilize their classifiers but those are created in a different way. Because of the fact that each leaf represents one class, and has no children there's no way to create data set for classifier using algorithm for non-leaf node. To overcome this problem each leaf is treated as a node with left child representing the same class as the leaf, and the right child representing all remaining classes. That way classifier is trained on two-class data and can be viewed as 'one-vs-rest' classifier. When it comes to classifying new, unknown pattern leaf uses its classifier to determine pattern's label. In case of '0' (meaning it should be sent to left child) the pattern is treated as an element from class represented by leaf. If the resulting label is '1' the pattern gets rejected and treated as a foreign one.
+Balanced Tree structure utilises clustering algorithms for its creation. It is usually shaped as a balanced binary tree, thus the name, with classifier in each of its nodes. Each node represents a set of classes that are currently taken into consideration as native ones for provided pattern. By traversing down the tree certain classes get rejected and the pattern is moved forward to the next node that represents only remaining classes. Decision as to which classes should be put in each of the child nodes is made by clustering algorithm that divides set of remaining classes from parent node into two separate sets and assigns one for each child node. If there's only one remaining class, tree leaf is created instead. Each node, except for leafs, contains binary classifier trained on data that is based on clustering algorithm results. What it mean is that patterns from training data set, that belong to classes dedicated for left child node, are joined together and are treated as one big class '0'. The same goes for patterns that belong to the right child node, except for the class number which is '1'. By having two, new data sets that represent two different classes, the parent node can finally create binary classifier. During classification procedure, after receiving new, unknown pattern each node uses its classifier to assign either '0' or '1' label to this pattern, which is then used to send it to left or right child accordingly for further classification. Balanced Tree leafs also utilize their classifiers but those are created in a different way. Because of the fact that each leaf represents one class, and has no children there's no way to create data set for classifier using algorithm for non-leaf node. To overcome this problem each leaf is treated as a node with left child representing the same class as the leaf, and the right child representing all remaining classes. That way classifier is trained on two-class data and can be viewed as 'one-vs-rest' classifier. When it comes to classifying new, unknown pattern leaf uses its classifier to determine pattern's label. In case of '0' (meaning it should be sent to left child) the pattern is treated as an element from class represented by leaf. If the resulting label is '1' the pattern gets rejected and treated as a foreign one.
 
 \subsection{Implementation details}
 
@@ -22,6 +22,7 @@ Creation of Balanced Tree structure starts from tree root and is done recursivel
 \section{Slanting Tree}
 
 \subsection{Description}
+\label{slanting_tree_description}
 
 Slanting Tree structure has its nodes chained in a very specific way. It always has $ 2n $ nodes (including leafs) where $n$ is the number of classes in the training set. Each node represents only one class, there are two nodes per class in total, one non-leaf node and one tree leaf. Non-leaf nodes play role of initial filters that try to conclude if the received unknown pattern belongs to a class this particular node represents. In case of classifying such pattern as a native one further classification is done by a child leaf node representing the same native class. If the leaf node also classifies received element as a native one no further classification is done and the pattern is marked as an object from leaf's class. If the opposite situation occurs and the element is not recognized, it is sent to the next non-leaf node in the tree as if the leaf's parent node did not recognize the element either. In case of no more nodes in the tree left the unknown pattern is rejected and treated as a foreign one.
 
@@ -29,15 +30,22 @@ Slanting Tree structure has its nodes chained in a very specific way. It always 
 
 \label{slanting_tree_implementation}Creation of Slanting Tree is done recursively, starting from the root node. All classes that should be distinguishable by this tree structure are sorted by their labels and stored in an array object. This object is later used during node creation method to check what classes have already been covered by previous nodes. Every non-leaf node represents only one native class and has its binary classifier trained in 'one-vs-rest' manner, the same way the tree leafs' classifiers in Balanced Tree are (see \ref{balanced_tree:one-vs-rest}). The next step involves creating left child node for the next native class in the array object that has not yet been used. In case of no classes left the function returns without creating new node. The last step consists of right child creation, which is a leaf node. Leafs in a Slanting Tree represent the same native classes their parent node did, but their classifiers, although built using same 'one-vs-rest' approach, are trained on a different data sets in order to create more accurate results. Usually trained classifier does not achieve 100\% accuracy even on a training test that was used during its creation. There are some samples from first class that get classified as elements from the second and vice versa. Such mistakes can help determine what kind of corrections can be made to the classifier. For every non-leaf node, after its classifier training, there's set of elements from the first class that were correctly recognized (those are the elements from the class this particular node is representing) and set of elements from the second class that were mistakenly recognized as elements from the first class. Those two sets are used in this node's child leaf node's classifier creation. Of course before training those two sets must be the same size, ideally having the same number of elements as two sets used in parent's classifier training. For each missing element in either of sets the new object is generated by randomly selecting one element from this set and applying normal distribution (with standard deviation 1) to all of its features in a feature vector, thus getting new sample that can be added to the set. In case of having less than certain number of elements (implementation checks for 10 or less elements) in either of sets before new point generation algorithm takes place, those sets are filled with randomly selected points from parent node's classifier training sets.
 
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=1\textwidth]{Figures/slanting_tree.jpg}
+	\caption{Slanting Tree example, trained on samples with class lables 0, 1, 2. Each node (depicted as rounded rectangle with solid border line) holds classifier that decides if provided pattern p belongs to the node's class (p in \{ node's\_class \}). If the pattern gets classified as a native one it's sent to the leaf node (depicted as rounded rectangle with dotted border), where it is classified once more by different classifier. Dotted line at the bottom of the image depicts final decisions (element classified as a member of certain class or rejected)}
+	\label{fig:rejection_version2}\vspace{-3pt}
+\end{figure}
+
 \section{Slanting Tree 2}
 
 \subsection{Description}
 
-Much like previously described Slanting Tree, this one has $ 2n $ nodes arranged in the same architecture. The difference lies in leaf nodes which, unlike the original Slanting Tree, are not using modified training data sets and have different classifier than parent nodes. The idea behind this implementation relies on the assumption that various classifiers tend to wrongly classify different patterns, so when combining them rejection rate should be improved.
+Much like previously described Slanting Tree, this one has $ 2n $ nodes arranged in the same architecture. The difference lies in leaf nodes which, unlike the original Slanting Tree, are not using modified training data sets and have different classifier than the parent nodes (e.g. non-leaf nodes using SVM classifier and leaf nodes using random forest). The idea behind this implementation relies on the assumption that various classifiers tend to wrongly classify different patterns, so when combining them rejection rate as well as classification rate should be vastly improved. Other than that there are no further changes and everything described in the Section \ref{slanting_tree_description} applies to Slanting Tree 2.
 
 \subsection{Implementation details}
 
-Creation procedure is mostly the same as in \ref{slanting_tree_implementation}. The only two differences are leaf nodes' creation, that instead of creating new training patterns takes them from the parent node, and different classifiers used by leaf and non-leaf nodes.
+Creation procedure is mostly the same as in \ref{slanting_tree_implementation}. The only two differences are present in leaf nodes' creation, that instead of creating new training patterns takes them from the parent node, and different classifiers used by leaf and non-leaf nodes.
 
 \section{Results}
 
@@ -67,7 +75,7 @@ When evaluating results quality evaluation measurements were taken into account 
 
 \subsubsection{SVM}
 
-The best results for Balanced tree with SVM classifier were achieved when using polynomial kernel, gamma 0.5 and C parameter value of 16. Generally, for polynomial kernel, better results were achieved when using bigger C values (gamma didn't have as much impact). Similar conclusion was made for rbf kernel.
+The best results for Balanced tree with SVM classifier were achieved when using polynomial kernel, gamma 0.5 and C parameter value of 16. Generally, for polynomial kernel, better results were achieved when using bigger C values (gamma didn't have as much impact). Similar conclusion was also made for rbf kernel, which performed slightly worse than the polynomial one.
 
 \begin{table}[htp]
 	\centering
@@ -104,7 +112,7 @@ The best results for Balanced tree with SVM classifier were achieved when using 
 
 \subsubsection{Random Forests}
 
-When using random forests as its classifier the balanced tree didn't improve much. Whereas more native patterns were correctly recognized and assigned their labels, the foreign patterns weren't properly rejected. As it can be seen in the Table \ref{balanced_tree_rf_results} balanced tree using random forests displayed tendency to classify unknown pattern rather than reject it. The score was achieved for classifier with 30 estimators in random forest.
+When using random forests as its classifier the balanced tree didn't improve much. Whereas more native patterns were correctly recognized and assigned their labels, the foreign patterns weren't properly rejected. As it can be seen in the Table \ref{balanced_tree_rf_results} balanced tree using random forests displayed tendency to classify unknown pattern rather than reject it. The presented score was achieved while using random forest classifier with 30 estimators.
 
 \begin{table}[htp]
 	\centering
@@ -141,7 +149,7 @@ When using random forests as its classifier the balanced tree didn't improve muc
 
 \subsubsection{k-Nearest Neighbours}
 
-Unfortunately using kNN classifier didn't bring any positive changes. Rejection mechanism is almost non-existent and the native pattern classification isn't satisfying. The best results were achieved when using 10 nearest neighbours to determine point affiliation (see Table \ref{balanced_tree_knn_results}).
+Unfortunately using kNN classifier didn't bring any positive changes. Rejection mechanism was almost non-existent and the native pattern classification wasn't satisfying. The best results were achieved when using 10 nearest neighbours to determine point affiliation (see Table \ref{balanced_tree_knn_results}).
 
 \begin{table}[htp]
 	\centering
@@ -180,7 +188,7 @@ Unfortunately using kNN classifier didn't bring any positive changes. Rejection 
 
 \subsubsection{SVM}
 
-Unlike Balanced tree using svm, where either kernel parameter value yielded similar results, Slanting tree works best when using rbf kernel. Bigger gamma values also help in maintaining higher foreign patterns rejection rates, although the final results (shown in Table \ref{slanting_tree_svm_results}) are worse than those achieved by Balanced tree.
+Unlike Balanced tree using SVM, where either kernel parameter value yielded similar results, Slanting tree works best when using rbf kernel. Bigger gamma values also help maintaining higher foreign patterns rejection rates, although the final results (shown in Table \ref{slanting_tree_svm_results}) are worse than those achieved by Balanced tree.
 
 \begin{table}[htp]
 	\centering
@@ -294,7 +302,7 @@ Similarly to Balanced tree, using kNN classifier in Slanting tree does not work 
 
 \subsubsection{SVM}
 
-Bigger C value again proved to be better when using SVM classifier. Similarly to Balanced tree using either polynomial or rbf kernel didn't have much impact on the results. This time it was the second common classifier that played crucial part in attaining results presented in Table \ref{slanting_tree2_svm_results}. In every case, when using random forests, both classification and rejection rates were the highest, with 30 estimators performing the best.
+Bigger C value again proved to be better when using SVM classifier. Similarly to Balanced tree, using either polynomial or rbf kernel didn't have much impact on the final results. This time it was the second common classifier that played crucial part in attaining results presented in Table \ref{slanting_tree2_svm_results}. In every case, when using random forests, both classification and rejection rates were the highest, with 30 estimators performing the best.
 
 \begin{table}[htp]
 	\centering
@@ -368,7 +376,7 @@ When using random forests as its main classifier, the Slanting tree 2 scored bes
 
 \subsubsection{k-Nearest Neighbours}
 
-Unlike the original Slanting tree, the version 2 does perform better when using kNN. After adding random forest as the second common classifier the rejection rate has increased almost 5 times. Despite the changes, the obtained solution is still outperformed by previous Slanting tree constructions (most notably the one using SVM and random forest combination). 
+Unlike the original Slanting tree, the version 2 does perform well when using kNN. After adding random forest as the second common classifier the rejection rate has increased almost 5 times. Despite the changes, the obtained solution is still outperformed by previous Slanting tree constructions (most notably the one using SVM and random forest combination) which questions its usefulness. 
 
 \begin{table}[htp]
 	\centering
@@ -402,3 +410,7 @@ Unlike the original Slanting tree, the version 2 does perform better when using 
 		\end{tabular}
 	}
 \end{table}
+
+\section{Summary}
+
+All of the classifier trees introduced in this chapter had good classification capabilities, very similar to the plain common classifiers they used. It is worth noting that not only did the classification rate stayed the same, but also rejection capabilities were introduced. Among all classifiers combinations tested it was the Slanting tree using random forests with 100 estimators that performed the best. Table \ref{slanting_tree2_rf_results} shows score achieved by this tree structure. Although being the best, classification rate achieved by this particular Slanting tree may not be considered good, as it's lower than 50\%. At best it could be seen as mediocre. Despite trying different classifiers and their parameters combinations no better solution could be found while using tree structures described in this chapter. The final conclusion can be made that the classifier trees introduced in this paper does not perform well enough to be used as a valid rejection mechanism. While still maintaining high classification rates those structures are slower than other popular classifiers which questions their usefulness.
