@@ -99,7 +99,8 @@ def _get_all_parameters_combinations():
         "svm": {
             'C': [8, 16],
             'kernel': ['rbf', 'poly'],
-            'gamma': [pow(2, -1), pow(2, -2), pow(2, -3)]
+            'gamma': ['auto', pow(2, -4), pow(2, -1), pow(2, -2), pow(2, -3)]
+            'tol': [1e-3, 1e-5]
         },
         "knn": {
             'n_neighbors': [3, 5, 7, 10],
