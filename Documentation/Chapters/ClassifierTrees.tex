@@ -1,3 +1,5 @@
+\lhead{\emph{Classifier Trees}}
+
 \chapter{Classifier Trees}
 
 Common classifiers described in the Chapter \ref{common_classifiers} return results in form of a class label that provided pattern was classified to. Such approach leaves no room for estimating class-belonging probabilities which, in return, results in inability to reject provided data, treating it as an outlier. By combining those classifiers and organising them in a complex structures it is possible to create objects with unique rejection capabilities in exchange for slightly increased pattern-processing time. This chapter describes such structures, shaped in form of binary trees.
@@ -6,9 +8,9 @@ Common classifiers described in the Chapter \ref{common_classifiers} return resu
 
 \subsection{Structure}
 
-The main idea behind Balanced Tree structure is to create a graph tree with every path from root to leaf consisting of increasingly precise classifiers. What it means is that every pattern, that should be classified, is tested against certain number of common classifiers, where each subsequent one is clarifying this unknown pattern's affiliation to one of the classes.
+The main idea behind Balanced Tree structure is to create a graph tree in which every path from root to leaf consists of increasingly precise classifiers. What it means is that every pattern, that should be classified, is tested against certain number of common classifiers, where each subsequent one is clarifying this unknown pattern's affiliation to one of the classes.
 
-The Balanced Tree construction begins with creation of a root node which represents a moment in a classification process in which all possible class memberships for an unknown pattern are taken into account. It can be said that the root of the Balanced Tree represents a set consisting of all classes in the training set, because it is yet unknown from which class a pattern would be. The process of clarifying pattern's class belonging starts by designating the central points for each class in the set of classes represented by this node. This is done by calculating arithmetic average of all points from certain class set: \[ p_{central} = \frac{\sum\limits_{i=1}^n p_{i}}{n} \] where $n$ is number of elements $p_{i}$ belonging to certain class in the dataset. Next step involves using clustering algorithm to divide all of those central points into two distinctive sets. The idea is to group those class representatives that are most similar to each other. The process of Balanced Tree structure creation is continued further by passing two classes sets designated by clustering algorithm, one to each child nodes. The process of new node creation is then applied to each of those two child nodes and continued until there is only one class left. A node representing only one class cannot use clustering method because there is insufficient number of classes to divide, and so it becomes the tree leaf. 
+The Balanced Tree construction begins with creation of a root node which represents a situation in a classification process in which all possible class memberships for an unknown pattern are taken into account. It can be said that the root of the Balanced Tree represents a set consisting of all classes in the training set, because it is yet unknown from which class a pattern would be. The process of clarifying pattern's class belonging starts by designating the central points for each class in the set of classes represented by this node. This is done by calculating arithmetic average of all points from certain class set: \[ p_{central} = \frac{\sum\limits_{i=1}^n p_{i}}{n} \] where $n$ is number of elements $p_{i}$ belonging to certain class in the dataset. Next step involves using clustering algorithm to divide all of those central points into two distinctive sets. The idea is to group those class representatives that are most similar to each other. The process of Balanced Tree structure creation is continued further by passing two classes sets designated by clustering algorithm, one to each child nodes. The process of new node creation is then applied to each of those two child nodes and continued until there is only one class left. A node representing only one class cannot use clustering method because there is insufficient number of classes to divide, and so it becomes the tree leaf. 
 
 \subsection{Classifiers creation}
 
@@ -29,12 +31,25 @@ Creation of Balanced Tree structure starts from tree root and is done recursivel
 	\label{fig:rejection_version1}\vspace{-3pt}
 \end{figure}
 
+
 \section{Slanting Tree}
 
-\subsection{Description}
 \label{slanting_tree_description}
 
-Slanting Tree structure has its nodes chained in a very specific way. It always has $ 2n $ nodes (including leafs) where $n$ is the number of classes in the training set. Each node represents only one class, there are two nodes per class in total, one non-leaf node and one tree leaf. Non-leaf nodes play role of initial filters that try to conclude if the received unknown pattern belongs to a class this particular node represents. In case of classifying such pattern as a native one further classification is done by a child leaf node representing the same native class. If the leaf node also classifies received element as a native one no further classification is done and the pattern is marked as an object from leaf's class. If the opposite situation occurs and the element is not recognized, it is sent to the next non-leaf node in the tree as if the leaf's parent node did not recognize the element either. In case of no more nodes in the tree left the unknown pattern is rejected and treated as a foreign one.
+\subsection{Structure}
+
+The Slanting Tree structure differs greatly from Balanced Tree's one. The concept implemented in Slanting Tree assumes that the unknown pattern, that is sent for classification, should be iteratively compared against each class representatives. Only when it is similar enough to points from certain class, more precise tests are made that ensure its affiliation. Should the tests fail, the pattern continues its iteration over other classes as if wasn't ever supposed to belong to this class. Rejection occurs when every test fails.
+
+Construction of the Slanting Tree is fairly simple, unlike the Balanced Tree. Each node represents exactly one class. Nodes are chained together in such manner that when traversing Slanting Tree from the root to the last node by choosing always the left child, exactly one node for each class in the training set is visited. Each of these nodes has also a right child that can be treated as a node between its parent and its parent's left child, that extends the path received when going from root to the last node by taking always the left node's successor. Each right child node represents the same class from the training data set as its parent does.
+
+\subsection{Classifiers creation}
+
+Each tree node in Slanting Tree has its own binary classifier, trained in a 'one-versus-rest' manner. Training is done on data containing two classes, where the first one consists of patterns from the training set which belong to the same class as the node represents, and the second one is obtained by concatenating patterns of each class from the training set except for the class represented by the node. To prevent the situation in which node and its right child have the classifier trained on the same data (because both nodes represent the same class) certain changes to training patterns must be introduced. This ensures that every classifier in the Slanting Tree is unique and can be used during classification procedure.
+
+
+\subsection{Classification rules}
+
+The classification starts from the root node, where the unknown pattern is tested by the first classifier and has its class affiliation checked. If the obtained result indicates that it isn't similar to the class represented by this node (gets classified as an element from the 'rest' class), the classification process is continued in the next node, which is the left child of the current one. If the opposite situation occurs, and the classifier accepts presented pattern as a representative of current node's class, the process is repeated in the right child node which uses more strict classifier. This is done to ensure that the unknown element, which is supposedly from the certain class, really belongs to it. If this test fails, the pattern is sent to the node as if the previous test also failed (it is sent to the left child of the current node's parent). In case of success the pattern gets successfully classified. When all tests fail (there is no more nodes to send pattern to) the element gets rejected.
 
 \subsection{Implementation details}
 
@@ -51,376 +66,133 @@ Slanting Tree structure has its nodes chained in a very specific way. It always 
 
 \subsection{Description}
 
-Much like previously described Slanting Tree, this one has $ 2n $ nodes arranged in the same architecture. The difference lies in leaf nodes which, unlike the original Slanting Tree, are not using modified training data sets and have different classifier than the parent nodes (e.g. non-leaf nodes using SVM classifier and leaf nodes using random forest). The idea behind this implementation relies on the assumption that various classifiers tend to wrongly classify different patterns, so when combining them rejection rate as well as classification rate should be vastly improved. Other than that there are no further changes and everything described in the Section \ref{slanting_tree_description} applies to Slanting Tree 2.
+Much like previously described Slanting Tree, this one has its nodes arranged in the same architecture. The difference lies in leaf nodes which, unlike the original Slanting Tree, are not using modified training data sets and use different classifier types instead (e.g. parent nodes using SVM classifier and their right children nodes using random forest). The idea behind this implementation relies on the assumption that various classifiers tend to wrongly classify different patterns, so when combining them rejection rate as well as classification rate should be vastly improved. Other than that there are no further changes and everything described in the Section \ref{slanting_tree_description} applies to Slanting Tree 2.
 
 \subsection{Implementation details}
 
-Creation procedure is mostly the same as in \ref{slanting_tree_implementation}. The only two differences are present in leaf nodes' creation, that instead of creating new training patterns takes them from the parent node, and different classifiers used by leaf and non-leaf nodes.
+Creation procedure is mostly the same as in \ref{slanting_tree_implementation}. The only differences are present in nodes creation method where instead of creating new training patterns for the right child node, different classifier type is trained on the same data from the parent node.
 
 \section{Results}
 
-Described in this chapter classifier trees were tested with various common classifiers: SVM, kNN and random forests, using different parameters. Over 500 tests were held. Results for training, test and letters sets were gathered in form of one big matrix with 21 rows and 11 columns. First ten rows corresponded to each of the ten classes from the training set (digits from '0' to '9'), next ten rows to the test set classes and the last one to patterns from the letters set. Numbers in each column represented how many patterns from row's class were classified as objects from native classes '0', '1', \dots, '9' or were rejected. See Table \ref{example_result_matrix} for reference.
+Described in this chapter classifier trees were tested with various common classifiers: SVM, kNN and random forest, using different parameters. Over 500 tests were held. Results in form of quality measurements (see Chapter \ref{quality_measures}) for training, test and letters sets were gathered in form of two matrices with 12 rows and 10 columns, one for training and one for test data. Each row in the matrix corresponds to one of the quality evaluation measurements, and each column represents value of corresponding measurement scored by certain classifier tree using one of the common classifiers. See Table \ref{example_result_matrix} for reference.
 
 \begin{table}[htp]
 	\centering
-	\caption{Example result matrix}
+	\caption{Example empty result matrix}
 	\label{example_result_matrix}
-	\begin{tabular}{l|c|c|c|c|c|c|c|c|c|c|c|}
-		\cline{2-12}
-		& \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \hline
-		\multicolumn{1}{|l|}{\textbf{class 0}} & 102        & 1          & 0          & 9          & 0          & 0          & 4          & 0          & 12         & 0          & 3                \\ \hline
-		\multicolumn{1}{|l|}{\textbf{class 1}} & 2          & 150        & 0          & 1          & 0          & 0          & 2          & 13         & 0          & 5          & 0                \\ \hline
-		\multicolumn{1}{|l|}{\textbf{...}}     &            &            &            &            &            &            &            &            &            &            &                  \\ \hline
-		\multicolumn{1}{|l|}{\textbf{class 9}} & 0          & 0          & 0          & 0          & 1          & 5          & 1          & 0          & 10         & 111        & 1                \\ \hline
-		\multicolumn{1}{|l|}{\textbf{foreign}} & 13         & 7          & 4          & 4          & 0          & 0          & 0          & 5          & 12         & 1          & 256              \\ \hline
+	\resizebox{\textwidth}{!}{
+	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|}
+		\cline{2-10}
+		\textbf{}                                                & \multicolumn{3}{l|}{\textbf{Balanced Tree}} & \multicolumn{3}{l|}{\textbf{Slanting Tree}} & \multicolumn{3}{l|}{\textbf{Slanting Tree 2}} \\ \cline{2-10} 
+		\textbf{}                                                & \textbf{kNN}  & \textbf{SVM}  & \textbf{RF} & \textbf{kNN}  & \textbf{SVM}  & \textbf{RF} & \textbf{kNN}   & \textbf{SVM}  & \textbf{RF}  \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Strict Acc.}}           &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Fine Acc.}}             &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Strict Native Sens.}} &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Acc.}}                  &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Native Prec.}}          &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Native Sens.}}        &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Native F-measure}}          &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Foreign Prec.}}         &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Foreign Sens.}}       &               &               &             &               &               &             &                &               &              \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         &               &               &             &               &               &             &                &               &              \\ \hline
 	\end{tabular}
+	}
 \end{table}
 
-Every common classifier that was used by any of tree nodes was tested with different parameters. SVM had its C, gamma and kernel options adjusted (see Chapter \ref{common_classifiers} for every parameter explanation). Values were as follows \[ C: [ 2, 4, 8, 16 ] \] \[ gamma: [ 2^{-1}, 2^{-2}, 2^{-3} ] \]  \[ kernel: [ rbf, poly ] \] 
+Every common classifier that was used by any of tree nodes was tested with different parameters. SVM had its C, gamma and kernel options adjusted (see Chapter \ref{common_classifiers} for every parameter explanation). Values were as follows \[ C: [ 1, 2, 4, 8, 16 ] \] \[ gamma: [ 2^{-1}, 2^{-2}, 2^{-3}, 2^{-4} ] \]  \[ kernel: [ rbf, poly ] \] 
 Adjustments for kNN were made for only one parameter, using euclidean metrics \[ n\_neighbors: [ 3, 5, 7, 10 ] \]
 Random forests also had modifications applied to one parameter \[ n\_estimators: [ 30, 50, 100, 150 ] \]
-When evaluating results quality evaluation measurements were taken into account (see Chapter \ref{quality_measures}). Best solutions were selected by comparing $ \frac{TP + TN}{2} $ values.
+When evaluating results quality evaluation measurements were taken into account (see Chapter \ref{quality_measures}). Best solutions were selected by comparing $ \frac{TP + TN}{2} $ values. In the next few subsections there is short summary for each classifier tree using different internal classifiers.
+
+\begin{table}[htp]
+	\centering
+	\caption{Measures values for classifier trees using various common classifiers on training data}
+	\label{classifier_trees_training_results}
+	\resizebox{\textwidth}{!}{
+	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|}
+		\cline{2-10}
+		\textbf{}                                                & \multicolumn{3}{l|}{\textbf{Balanced Tree}}   & \multicolumn{3}{l|}{\textbf{Slanting Tree}} & \multicolumn{3}{l|}{\textbf{Slanting Tree 2}} \\ \cline{2-10} 
+		\textbf{}                                                & \textbf{kNN}     & \textbf{SVM} & \textbf{RF} & \textbf{kNN}  & \textbf{SVM}  & \textbf{RF} & \textbf{kNN}   & \textbf{SVM}  & \textbf{RF}  \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Strict Acc.}}           & 20.67 & 44.92        & 41.47       & 22.76         & 29.70         & 50.29       & 38.34          & 41.51         & 40.59        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Fine Acc.}}             & 92.66 & 99.33        & 100.00      & 90.61         & 91.79         & 92.43       & 94.08          & 95.41         & 95.94        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Strict Native Sens.}} & 92.64 & 99.09        & 100.00      & 90.00         & 91.73         & 92.43       & 93.06          & 95.26         & 95.79        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Acc.}}                  & 22.21 & 45.06        & 41.47       & 24.72         & 31.42         & 51.88       & 39.57          & 42.47         & 41.44        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Native Prec.}}          & 21.23 & 27.60        & 26.38       & 21.70         & 23.41         & 30.35       & 25.62          & 26.69         & 26.35        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Native Sens.}}        & 99.99 & 99.76        & 100.00      & 99.33         & 99.93         & 100.00      & 98.91          & 99.84         & 99.84        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 35.02 & 43.23        & 41.74       & 35.62         & 37.93         & 46.57       & 40.70          & 42.13         & 41.69        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Foreign Prec.}}         & 99.76 & 99.79        & 100.00      & 96.51         & 99.86         & 100.00      & 98.81          & 99.85         & 99.84        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Foreign Sens.}}       & 1.58 & 30.55        & 25.94       & 4.92          & 13.25         & 39.11       & 23.82          & 27.25         & 25.94        \\ \hline
+		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 3.10  & 46.78        & 41.20       & 9.37          & 23.39         & 56.23       & 38.39          & 42.82         & 41.18        \\ \hline
+	\end{tabular}
+	}
+\end{table}
+
+\begin{table}[htp]
+	\centering
+	\caption{Measures values for classifier trees using various common classifiers on test data}
+	\label{classifier_trees_test_results}
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{l|l|l|l|l|l|l|l|l|l|}
+			\cline{2-10}
+			\textbf{}                                                & \multicolumn{3}{l|}{\textbf{Balanced Tree}} & \multicolumn{3}{l|}{\textbf{Slanting Tree}} & \multicolumn{3}{l|}{\textbf{Slanting Tree 2}} \\ \cline{2-10} 
+			\textbf{}                                                & \textbf{kNN}  & \textbf{SVM}  & \textbf{RF} & \textbf{kNN}  & \textbf{SVM}  & \textbf{RF} & \textbf{kNN}   & \textbf{SVM}  & \textbf{RF}  \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Strict Acc.}}           & 10.79         & 37.04         & 32.81       & 13.41         & 21.18         & 44.21       & 30.72          & 33.94         & 32.75        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Fine Acc.}}             & 91.86         & 96.44         & 95.56       & 88.89         & 91.49         & 90.36       & 93.45          & 95.02         & 94.56        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Strict Native Sens.}} & 91.77         & 94.03         & 93.23       & 88.00         & 90.97         & 89.03       & 91.33          & 92.80         & 92.67        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Acc.}}                  & 11.62         & 37.39         & 33.26       & 14.53         & 22.05         & 45.18       & 31.37          & 34.44         & 33.30        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Native Prec.}}          & 10.35         & 13.77         & 13.03       & 10.59         & 11.53         & 15.54       & 12.73          & 13.24         & 13.08        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Native Sens.}}        & 99.90         & 97.50         & 97.57       & 99.00         & 99.43         & 98.53       & 97.73          & 97.67         & 98.00        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 18.75         & 24.13         & 22.99       & 19.13         & 20.66         & 26.85       & 22.53          & 23.33         & 23.08        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Foreign Prec.}}         & 99.28         & 99.08         & 98.94       & 97.74         & 99.52         & 99.58       & 98.93          & 99.04         & 99.13        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Foreign Sens.}}       & 1.58          & 30.55         & 25.94       & 4.92          & 13.25         & 39.11       & 23.82          & 27.25         & 25.94        \\ \hline
+			\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 3.10          & 46.70         & 41.11       & 9.38          & 23.38         & 56.16       & 38.40          & 42.74         & 41.12        \\ \hline
+		\end{tabular}
+	}
+\end{table}
 
 \subsection{Balanced Tree}
 
 \subsubsection{SVM}
 
-The best results for Balanced tree with SVM classifier were achieved when using polynomial kernel, gamma 0.5 and C parameter value of 16. Generally, for polynomial kernel, better results were achieved when using bigger C values (gamma didn't have as much impact). Similar conclusion was also made for rbf kernel, which performed slightly worse than the polynomial one.
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Balanced tree using SVM classifier with C=16, gamma=0.5 and kernel=poly}
-	\label{balanced_tree_svm_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 674        & 0          & 1          & 1          & 0          & 0          & 0          & 0          & 4          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{1} & 0          & 786        & 1          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{2} & 0          & 0          & 716        & 0          & 0          & 0          & 0          & 1          & 0          & 1          & 3                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 0          & 691        & 0          & 0          & 0          & 1          & 2          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 0          & 0          & 0          & 674        & 0          & 0          & 0          & 0          & 1          & 1                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 0          & 2          & 0          & 624        & 1          & 0          & 5          & 2          & 2                \\ \cline{2-13} 
-		& \textbf{6} & 0          & 0          & 0          & 0          & 0          & 0          & 673        & 0          & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 0          & 0          & 1          & 0          & 0          & 711        & 0          & 5          & 1                \\ \cline{2-13} 
-		& \textbf{8} & 4          & 0          & 0          & 0          & 0          & 0          & 0          & 1          & 664        & 1          & 4                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 2          & 0          & 2          & 0          & 2          & 0          & 3          & 2          & 723        & 5                \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 283        & 0          & 2          & 1          & 0          & 0          & 3          & 0          & 3          & 0          & 8                \\ \cline{2-13} 
-		& \textbf{1} & 1          & 332        & 2          & 1          & 0          & 0          & 1          & 0          & 3          & 1          & 7                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 0          & 289        & 2          & 0          & 1          & 1          & 2          & 4          & 0          & 11               \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 3          & 291        & 0          & 4          & 0          & 5          & 1          & 0          & 11               \\ \cline{2-13} 
-		& \textbf{4} & 0          & 0          & 1          & 0          & 288        & 0          & 2          & 1          & 4          & 4          & 6                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 0          & 3          & 0          & 243        & 0          & 1          & 1          & 1          & 7                \\ \cline{2-13} 
-		& \textbf{6} & 2          & 3          & 0          & 0          & 0          & 0          & 273        & 0          & 1          & 0          & 5                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 2          & 2          & 1          & 0          & 0          & 301        & 0          & 1          & 3                \\ \cline{2-13} 
-		& \textbf{8} & 4          & 3          & 0          & 2          & 0          & 2          & 2          & 1          & 272        & 4          & 10               \\ \cline{2-13} 
-		& \textbf{9} & 0          & 1          & 0          & 0          & 1          & 2          & 0          & 5          & 5          & 249        & 7                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 688        & 2381       & 1311       & 344        & 2268       & 973        & 6993       & 637        & 1769       & 958        & 8061             \\ \hline
-	\end{tabular}
-	}
-\end{table}
+The best results for Balanced tree with SVM classifier are achieved when using polynomial kernel, gamma 0.5 and C parameter value of 16. Generally, for polynomial kernel, better results are achieved when using bigger C values (gamma doesn't have as much impact). Similar conclusion can also be made for rbf kernel, which performs only slightly worse than the polynomial one.
 
 \subsubsection{Random Forests}
 
-When using random forests as its classifier the balanced tree didn't improve much. Whereas more native patterns were correctly recognized and assigned their labels, the foreign patterns weren't properly rejected. As it can be seen in the Table \ref{balanced_tree_rf_results} balanced tree using random forests displayed tendency to classify unknown pattern rather than reject it. The presented score was achieved while using random forest classifier with 30 estimators.
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Balanced tree using Random Forests classifier with n\_estimators=30}
-	\label{balanced_tree_rf_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 680        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{1} & 0          & 787        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{2} & 0          & 0          & 721        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 0          & 695        & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 0          & 0          & 0          & 676        & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 0          & 0          & 0          & 636        & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{6} & 0          & 0          & 0          & 0          & 0          & 0          & 674        & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 718        & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{8} & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 674        & 0          & 0                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 739        & 0                \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 281        & 1          & 2          & 0          & 0          & 0          & 5          & 0          & 4          & 0          & 7                \\ \cline{2-13} 
-		& \textbf{1} & 0          & 339        & 3          & 0          & 1          & 0          & 1          & 0          & 2          & 0          & 2                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 0          & 285        & 7          & 0          & 0          & 1          & 1          & 2          & 0          & 14               \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 4          & 289        & 0          & 3          & 0          & 9          & 1          & 0          & 9                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 1          & 0          & 0          & 283        & 0          & 3          & 1          & 0          & 7          & 11               \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 0          & 10         & 1          & 234        & 0          & 1          & 3          & 0          & 7                \\ \cline{2-13} 
-		& \textbf{6} & 1          & 1          & 1          & 0          & 1          & 1          & 272        & 0          & 3          & 0          & 4                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 0          & 1          & 2          & 2          & 0          & 291        & 0          & 8          & 6                \\ \cline{2-13} 
-		& \textbf{8} & 4          & 3          & 0          & 2          & 1          & 1          & 2          & 0          & 278        & 1          & 8                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 2          & 0          & 2          & 9          & 1          & 0          & 3          & 3          & 245        & 5                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 917        & 1075       & 2482       & 357        & 4330       & 3072       & 5905       & 158        & 765        & 477        & 6845             \\ \hline
-	\end{tabular}
-}
-\end{table}
+When using random forest as its classifier the Balanced Tree doesn't improve much. Whereas more native patterns are correctly recognized and assigned their labels, the foreign patterns aren't properly rejected. As it can be seen in the result Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results} Balanced Tree using random forest displays tendency to classify unknown pattern rather than reject it. The presented score was achieved while using random forest classifier with 30 estimators.
 
 \subsubsection{k-Nearest Neighbours}
 
-Unfortunately using kNN classifier didn't bring any positive changes. Rejection mechanism was almost non-existent and the native pattern classification wasn't satisfying. The best results were achieved when using 10 nearest neighbours to determine point affiliation (see Table \ref{balanced_tree_knn_results}).
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Balanced tree using k-Nearest Neighbours classifier with n\_neighbours=10}
-	\label{balanced_tree_knn_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 649        & 6          & 2          & 2          & 0          & 1          & 8          & 0          & 12         & 0          & 0                \\ \cline{2-13} 
-		& \textbf{1} & 1          & 757        & 7          & 4          & 1          & 4          & 5          & 0          & 3          & 4          & 1                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 1          & 675        & 17         & 4          & 0          & 4          & 11         & 6          & 1          & 1                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 4          & 666        & 0          & 12         & 1          & 7          & 5          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 1          & 2          & 4          & 2          & 617        & 0          & 7          & 1          & 3          & 39         & 0                \\ \cline{2-13} 
-		& \textbf{5} & 3          & 0          & 1          & 16         & 5          & 591        & 6          & 0          & 8          & 6          & 0                \\ \cline{2-13} 
-		& \textbf{6} & 8          & 6          & 4          & 1          & 0          & 4          & 646        & 0          & 5          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 1          & 10         & 8          & 11         & 1          & 0          & 650        & 1          & 35         & 1                \\ \cline{2-13} 
-		& \textbf{8} & 32         & 7          & 6          & 5          & 2          & 1          & 13         & 0          & 591        & 17         & 0                \\ \cline{2-13} 
-		& \textbf{9} & 1          & 3          & 1          & 15         & 13         & 8          & 0          & 9          & 10         & 677        & 2                \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 278        & 6          & 3          & 2          & 1          & 0          & 7          & 0          & 2          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{1} & 0          & 334        & 4          & 1          & 2          & 1          & 3          & 1          & 1          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{2} & 0          & 1          & 290        & 7          & 0          & 2          & 2          & 3          & 3          & 3          & 0                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 7          & 289        & 1          & 8          & 0          & 5          & 4          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 2          & 0          & 0          & 266        & 0          & 3          & 4          & 3          & 28         & 0                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 1          & 10         & 0          & 235        & 0          & 1          & 3          & 6          & 0                \\ \cline{2-13} 
-		& \textbf{6} & 3          & 3          & 0          & 0          & 0          & 0          & 276        & 0          & 2          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 2          & 6          & 4          & 0          & 0          & 281        & 0          & 17         & 0                \\ \cline{2-13} 
-		& \textbf{8} & 10         & 5          & 3          & 2          & 2          & 2          & 7          & 2          & 264        & 3          & 0                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 1          & 0          & 1          & 3          & 1          & 0          & 7          & 5          & 251        & 1                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 1287       & 1662       & 3115       & 1499       & 4514       & 5191       & 5443       & 273        & 1546       & 1163       & 690              \\ \hline
-	\end{tabular}
-}
-\end{table}
+Unfortunately using kNN classifier doesn't bring any positive changes. Rejection mechanism is almost non-existent and the native pattern classification isn't satisfying. The best results are achieved when using 10 nearest neighbours to determine point affiliation.
 
 \subsection{Slanting Tree}
 
 \subsubsection{SVM}
 
-Unlike Balanced tree using SVM, where either kernel parameter value yielded similar results, Slanting tree works best when using rbf kernel. Bigger gamma values also help maintaining higher foreign patterns rejection rates, although the final results (shown in Table \ref{slanting_tree_svm_results}) are worse than those achieved by Balanced tree.
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Slanting tree using SVM classifier with C=16, gamma=0.5 and kernel=rbf}
-	\label{slanting_tree_svm_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 677        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 2          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{1} & 8          & 778        & 1          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{2} & 2          & 10         & 708        & 0          & 0          & 0          & 0          & 0          & 0          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{3} & 1          & 1          & 14         & 678        & 0          & 0          & 0          & 0          & 1          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 1          & 1          & 5          & 1          & 667        & 0          & 0          & 0          & 0          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{5} & 3          & 2          & 2          & 42         & 2          & 583        & 2          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{6} & 14         & 11         & 18         & 0          & 23         & 13         & 595        & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 1          & 6          & 17         & 26         & 13         & 4          & 0          & 650        & 0          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{8} & 59         & 1          & 10         & 4          & 4          & 23         & 8          & 4          & 558        & 1          & 2                \\ \cline{2-13} 
-		& \textbf{9} & 1          & 10         & 1          & 15         & 48         & 30         & 0          & 55         & 50         & 527        & 2                \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 294        & 0          & 0          & 1          & 0          & 1          & 3          & 0          & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{1} & 2          & 343        & 1          & 0          & 0          & 0          & 1          & 0          & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 3          & 302        & 0          & 0          & 1          & 0          & 1          & 1          & 0          & 2                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 6          & 297        & 0          & 0          & 0          & 2          & 2          & 1          & 7                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 7          & 1          & 1          & 292        & 0          & 1          & 0          & 4          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 0          & 18         & 2          & 234        & 0          & 0          & 2          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{6} & 3          & 3          & 3          & 0          & 5          & 3          & 265        & 0          & 0          & 0          & 2                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 1          & 5          & 17         & 7          & 1          & 0          & 278        & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{8} & 32         & 0          & 6          & 2          & 1          & 15         & 3          & 3          & 235        & 0          & 3                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 5          & 2          & 2          & 19         & 15         & 0          & 23         & 15         & 189        & 0                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 1408       & 7052       & 3363       & 914        & 2778       & 2394       & 3101       & 399        & 1181       & 298        & 3495             \\ \hline
-	\end{tabular}
-}
-\end{table}
+Unlike Balanced tree using SVM, where either kernel parameter value yields similar results, Slanting Tree works best when using rbf kernel. Bigger gamma values also help maintaining higher foreign patterns rejection rates, although the final results are worse than those achieved by Balanced tree.
 
 \subsubsection{Random Forests}
 
-Slanting tree performs best when using random forests as its internal classifier. Although it presents excellent classification abilities and the rejection rate is best among all classifier trees tested, it still can be considered only mediocre in terms of usefulness. The results, which are contained within Table \ref{slanting_tree_rf_results}, were obtained when using 100 estimators for each random forest classifier.
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Slanting tree using Random Forests classifier with n\_estimators=100}
-	\label{slanting_tree_rf_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 680        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{1} & 0          & 787        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 0          & 720        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 31         & 664        & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 3          & 5          & 0          & 668        & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{5} & 4          & 0          & 2          & 65         & 2          & 563        & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{6} & 21         & 11         & 14         & 1          & 13         & 1          & 613        & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 4          & 13         & 3          & 16         & 1          & 0          & 681        & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{8} & 60         & 3          & 7          & 0          & 5          & 10         & 6          & 2          & 581        & 0          & 0                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 7          & 1          & 14         & 85         & 13         & 0          & 65         & 41         & 513        & 0                \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 289        & 0          & 3          & 0          & 1          & 0          & 2          & 1          & 1          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{1} & 1          & 338        & 3          & 0          & 1          & 0          & 0          & 1          & 1          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 0          & 301        & 3          & 0          & 0          & 0          & 1          & 2          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 28         & 266        & 0          & 0          & 0          & 8          & 2          & 0          & 11               \\ \cline{2-13} 
-		& \textbf{4} & 1          & 1          & 0          & 0          & 296        & 0          & 0          & 2          & 2          & 1          & 3                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 1          & 26         & 1          & 218        & 0          & 0          & 3          & 0          & 7                \\ \cline{2-13} 
-		& \textbf{6} & 14         & 4          & 4          & 0          & 5          & 2          & 253        & 0          & 1          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 2          & 4          & 6          & 1          & 0          & 294        & 0          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{8} & 35         & 3          & 2          & 0          & 1          & 13         & 2          & 0          & 237        & 0          & 7                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 2          & 0          & 2          & 41         & 6          & 0          & 22         & 15         & 179        & 3                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 699        & 654        & 3101       & 198        & 4059       & 4158       & 2357       & 162        & 490        & 187        & 10318            \\ \hline
-	\end{tabular}
-}
-\end{table}
+Slanting Tree performs best when using random forest as its internal classifier. Although it presents excellent classification abilities and the rejection rate is best among all classifier trees tested, it still can be considered only mediocre in terms of usefulness. The results, which are contained within Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results}, were obtained when using 100 estimators for each random forest classifier.
 
 \subsubsection{k-Nearest Neighbours}
 
-Similarly to Balanced tree, using kNN classifier in Slanting tree does not work as expected. Not only its classification is bad but also rejection does not bring satisfying results. Table \ref{slanting_tree_knn_results} presents those results which were obtained when using kNN classifiers taking into consideration only 2 nearest neighbours for each presented, unknown pattern.
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Slanting tree using k-Nearest Neighbours classifier with n\_neighbours=2}
-	\label{slanting_tree_knn_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 670        & 0          & 0          & 1          & 0          & 0          & 4          & 0          & 2          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{1} & 21         & 754        & 4          & 0          & 2          & 1          & 2          & 0          & 0          & 1          & 2                \\ \cline{2-13} 
-		& \textbf{2} & 5          & 4          & 700        & 2          & 0          & 0          & 0          & 4          & 2          & 2          & 2                \\ \cline{2-13} 
-		& \textbf{3} & 3          & 0          & 29         & 649        & 0          & 3          & 0          & 4          & 2          & 0          & 5                \\ \cline{2-13} 
-		& \textbf{4} & 1          & 1          & 9          & 2          & 644        & 0          & 3          & 1          & 3          & 7          & 5                \\ \cline{2-13} 
-		& \textbf{5} & 3          & 4          & 4          & 39         & 8          & 567        & 1          & 0          & 2          & 1          & 7                \\ \cline{2-13} 
-		& \textbf{6} & 31         & 17         & 6          & 2          & 6          & 7          & 605        & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 3          & 23         & 18         & 24         & 1          & 0          & 636        & 0          & 7          & 6                \\ \cline{2-13} 
-		& \textbf{8} & 84         & 15         & 15         & 2          & 9          & 7          & 22         & 5          & 506        & 2          & 7                \\ \cline{2-13} 
-		& \textbf{9} & 3          & 6          & 4          & 15         & 37         & 17         & 0          & 59         & 19         & 569        & 10               \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 284        & 1          & 3          & 1          & 1          & 1          & 5          & 0          & 1          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{1} & 15         & 325        & 1          & 0          & 0          & 0          & 3          & 1          & 1          & 0          & 2                \\ \cline{2-13} 
-		& \textbf{2} & 3          & 1          & 297        & 4          & 1          & 0          & 0          & 2          & 1          & 0          & 2                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 1          & 14         & 271        & 2          & 9          & 0          & 5          & 3          & 2          & 8                \\ \cline{2-13} 
-		& \textbf{4} & 2          & 3          & 0          & 0          & 284        & 0          & 1          & 3          & 0          & 8          & 5                \\ \cline{2-13} 
-		& \textbf{5} & 1          & 0          & 3          & 26         & 3          & 220        & 0          & 0          & 2          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{6} & 11         & 7          & 3          & 1          & 1          & 0          & 258        & 0          & 3          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 1          & 1          & 6          & 7          & 8          & 0          & 0          & 281        & 0          & 5          & 1                \\ \cline{2-13} 
-		& \textbf{8} & 46         & 13         & 8          & 1          & 3          & 7          & 7          & 2          & 204        & 2          & 7                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 4          & 2          & 2          & 10         & 7          & 0          & 23         & 4          & 216        & 2                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 2666       & 2189       & 4021       & 1084       & 4321       & 4710       & 4262       & 274        & 1194       & 363        & 1299             \\ \hline
-	\end{tabular}
-}
-\end{table}
+Similarly to Balanced tree, using kNN classifier in Slanting Tree does not work as expected. Not only its classification is bad but also rejection does not bring satisfying results, even when using kNN classifiers that takes into consideration only 2 nearest neighbours for each presented, unknown pattern.
 
 
 \subsection{Slanting Tree 2}
 
 \subsubsection{SVM}
 
-Bigger C value again proved to be better when using SVM classifier. Similarly to Balanced tree, using either polynomial or rbf kernel didn't have much impact on the final results. This time it was the second common classifier that played crucial part in attaining results presented in Table \ref{slanting_tree2_svm_results}. In every case, when using random forests, both classification and rejection rates were the highest, with 30 estimators performing the best.
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Slanting tree 2 using SVM classifier with C=16, gamma=0.5, kernel=rbf combined with random forest with n\_estimators=30}
-	\label{slanting_tree2_svm_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 677        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 2          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{1} & 2          & 785        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 0          & 719        & 0          & 0          & 0          & 0          & 0          & 0          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 9          & 686        & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 1          & 5          & 0          & 669        & 0          & 0          & 0          & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{5} & 3          & 1          & 1          & 34         & 1          & 594        & 0          & 0          & 1          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{6} & 7          & 7          & 9          & 0          & 15         & 3          & 633        & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 3          & 6          & 5          & 10         & 0          & 0          & 693        & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{8} & 40         & 1          & 6          & 0          & 3          & 8          & 7          & 1          & 604        & 1          & 3                \\ \cline{2-13} 
-		& \textbf{9} & 1          & 5          & 1          & 7          & 37         & 9          & 0          & 40         & 27         & 608        & 4                \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 289        & 0          & 3          & 0          & 0          & 0          & 3          & 1          & 0          & 0          & 4                \\ \cline{2-13} 
-		& \textbf{1} & 1          & 341        & 2          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 4                \\ \cline{2-13} 
-		& \textbf{2} & 0          & 0          & 298        & 1          & 1          & 0          & 0          & 1          & 1          & 0          & 9                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 4          & 290        & 0          & 0          & 0          & 5          & 2          & 0          & 14               \\ \cline{2-13} 
-		& \textbf{4} & 0          & 1          & 0          & 0          & 293        & 0          & 1          & 1          & 1          & 3          & 6                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 0          & 12         & 1          & 236        & 0          & 0          & 1          & 0          & 6                \\ \cline{2-13} 
-		& \textbf{6} & 3          & 2          & 2          & 0          & 4          & 1          & 268        & 0          & 1          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 1          & 2          & 1          & 0          & 0          & 299        & 0          & 0          & 7                \\ \cline{2-13} 
-		& \textbf{8} & 21         & 1          & 1          & 1          & 1          & 7          & 3          & 0          & 255        & 0          & 10               \\ \cline{2-13} 
-		& \textbf{9} & 0          & 1          & 1          & 1          & 18         & 5          & 0          & 12         & 10         & 215        & 7                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 767        & 4518       & 2493       & 304        & 4026       & 2273       & 3641       & 309        & 547        & 315        & 7190             \\ \hline
-	\end{tabular}
-}
-\end{table}
+Bigger C value again proves to be better when using SVM classifier. Similarly to Balanced Tree, using either polynomial or rbf kernel doesn't have much impact on the final results. This time it is the second common classifier that played crucial part in attaining results presented in Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results}. In every case, when using random forest, both classification and rejection rates are very high, with 30 estimators performing the best.
 
 \subsubsection{Random Forests}
 
-When using random forests as its main classifier, the Slanting tree 2 scored best result with SVM as the second common classifier. The main similarity between best solution obtained for Slanting tree using SVM as its main common classifier and the one using random forests is that both of them use in fact the same two classifiers but in a reversed order. After comparing Table \ref{slanting_tree2_rf_results} with Table \ref{slanting_tree2_svm_results} it can be seen that for Slanting tree 2 it's better to use SVM backed up by random forests as its rejection rate is higher.
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Slanting tree using Random Forests classifier with n\_estimators=30 combined with SVM with kernel=rbf, C=16 and gamma=0.5}
-	\label{slanting_tree2_rf_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-		& \textbf{0} & 677        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 2          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{1} & 1          & 786        & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 0          & 719        & 0          & 0          & 0          & 0          & 0          & 0          & 1          & 0                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 9          & 686        & 0          & 0          & 0          & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{4} & 0          & 1          & 4          & 0          & 670        & 0          & 0          & 0          & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{5} & 3          & 1          & 1          & 32         & 1          & 596        & 0          & 0          & 1          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{6} & 6          & 6          & 5          & 0          & 13         & 4          & 640        & 0          & 0          & 0          & 0                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 2          & 4          & 4          & 8          & 0          & 0          & 699        & 0          & 0          & 1                \\ \cline{2-13} 
-		& \textbf{8} & 34         & 0          & 3          & 0          & 2          & 10         & 4          & 0          & 617        & 1          & 3                \\ \cline{2-13} 
-		& \textbf{9} & 1          & 5          & 0          & 8          & 33         & 12         & 0          & 34         & 27         & 615        & 4                \\ \hline
-		\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 288        & 0          & 4          & 0          & 0          & 0          & 3          & 1          & 1          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{1} & 0          & 341        & 2          & 0          & 1          & 0          & 0          & 1          & 0          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{2} & 1          & 0          & 300        & 1          & 0          & 0          & 0          & 1          & 1          & 0          & 7                \\ \cline{2-13} 
-		& \textbf{3} & 0          & 0          & 5          & 287        & 0          & 0          & 0          & 5          & 3          & 0          & 15               \\ \cline{2-13} 
-		& \textbf{4} & 0          & 1          & 1          & 0          & 292        & 0          & 1          & 0          & 2          & 4          & 5                \\ \cline{2-13} 
-		& \textbf{5} & 0          & 0          & 0          & 15         & 1          & 232        & 0          & 0          & 2          & 0          & 6                \\ \cline{2-13} 
-		& \textbf{6} & 3          & 2          & 1          & 0          & 1          & 1          & 272        & 0          & 1          & 0          & 3                \\ \cline{2-13} 
-		& \textbf{7} & 0          & 0          & 0          & 2          & 2          & 1          & 0          & 297        & 0          & 1          & 7                \\ \cline{2-13} 
-		& \textbf{8} & 20         & 1          & 4          & 1          & 1          & 8          & 3          & 0          & 256        & 0          & 6                \\ \cline{2-13} 
-		& \textbf{9} & 0          & 1          & 0          & 1          & 19         & 6          & 0          & 12         & 11         & 215        & 5                \\ \hline
-		\textbf{foreign}                    & \textbf{}  & 724        & 4867       & 2578       & 270        & 3797       & 2208       & 3797       & 270        & 676        & 352        & 6844             \\ \hline
-	\end{tabular}
-}
-\end{table}
+When using random forest as its main classifier, the Slanting Tree 2 scores best result with SVM as the second common classifier. The main similarity between best solution obtained for Slanting Tree 2 using SVM as its main common classifier and the one using random forest is that both of them use in fact the same two classifiers but in a reversed order. After comparing results in both Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results} it can be seen that for Slanting Tree 2 it's better to use SVM backed up by random forests as its rejection rate is higher.
 
 \subsubsection{k-Nearest Neighbours}
 
-Unlike the original Slanting tree, the version 2 does perform well when using kNN. After adding random forest as the second common classifier the rejection rate has increased almost 5 times. Despite the changes, the obtained solution is still outperformed by previous Slanting tree constructions (most notably the one using SVM and random forest combination) which questions its usefulness. 
-
-\begin{table}[htp]
-	\centering
-	\caption{Results for Slanting tree using k-Nearest Neighbours classifier with n\_neighbours=10 combined with random forest with n\_estimators=30}
-	\label{slanting_tree2_knn_results}
-	\resizebox{\textwidth}{!}{
-		\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-			\hline
-			\multirow{11}{*}{\textbf{training}} & class      & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{foreign} \\ \cline{2-13} 
-			& \textbf{0} & 667        & 2          & 1          & 2          & 0          & 0          & 1          & 0          & 3          & 0          & 4                \\ \cline{2-13} 
-			& \textbf{1} & 0          & 769        & 5          & 0          & 0          & 1          & 2          & 0          & 1          & 1          & 8                \\ \cline{2-13} 
-			& \textbf{2} & 1          & 0          & 706        & 0          & 0          & 0          & 0          & 2          & 0          & 1          & 11               \\ \cline{2-13} 
-			& \textbf{3} & 0          & 0          & 19         & 666        & 0          & 1          & 0          & 3          & 4          & 0          & 2                \\ \cline{2-13} 
-			& \textbf{4} & 0          & 1          & 6          & 0          & 657        & 0          & 3          & 1          & 1          & 2          & 5                \\ \cline{2-13} 
-			& \textbf{5} & 4          & 0          & 0          & 40         & 2          & 575        & 1          & 1          & 0          & 0          & 13               \\ \cline{2-13} 
-			& \textbf{6} & 8          & 6          & 9          & 0          & 7          & 0          & 633        & 0          & 0          & 0          & 11               \\ \cline{2-13} 
-			& \textbf{7} & 0          & 1          & 8          & 3          & 13         & 0          & 0          & 679        & 0          & 8          & 6                \\ \cline{2-13} 
-			& \textbf{8} & 49         & 6          & 6          & 0          & 4          & 7          & 10         & 2          & 582        & 2          & 6                \\ \cline{2-13} 
-			& \textbf{9} & 0          & 5          & 2          & 15         & 47         & 12         & 0          & 36         & 32         & 580        & 10               \\ \hline
-			\multirow{10}{*}{\textbf{test}}     & \textbf{0} & 287        & 2          & 3          & 0          & 0          & 0          & 2          & 0          & 1          & 0          & 5                \\ \cline{2-13} 
-			& \textbf{1} & 0          & 336        & 3          & 0          & 1          & 1          & 1          & 1          & 0          & 0          & 5                \\ \cline{2-13} 
-			& \textbf{2} & 1          & 0          & 300        & 3          & 0          & 0          & 0          & 0          & 1          & 0          & 6                \\ \cline{2-13} 
-			& \textbf{3} & 0          & 0          & 12         & 279        & 0          & 0          & 0          & 8          & 2          & 0          & 14               \\ \cline{2-13} 
-			& \textbf{4} & 1          & 1          & 0          & 0          & 290        & 0          & 0          & 2          & 3          & 3          & 6                \\ \cline{2-13} 
-			& \textbf{5} & 0          & 0          & 0          & 18         & 1          & 226        & 0          & 0          & 1          & 0          & 10               \\ \cline{2-13} 
-			& \textbf{6} & 4          & 3          & 1          & 0          & 2          & 1          & 271        & 0          & 1          & 0          & 1                \\ \cline{2-13} 
-			& \textbf{7} & 0          & 0          & 1          & 3          & 6          & 0          & 0          & 292        & 0          & 1          & 7                \\ \cline{2-13} 
-			& \textbf{8} & 26         & 2          & 4          & 2          & 1          & 7          & 4          & 0          & 246        & 0          & 8                \\ \cline{2-13} 
-			& \textbf{9} & 0          & 0          & 0          & 3          & 17         & 3          & 0          & 13         & 15         & 213        & 6                \\ \hline
-			\textbf{foreign}                    & \textbf{}  & 874        & 1456       & 3254       & 361        & 5312       & 4390       & 3223       & 310        & 642        & 276        & 6285             \\ \hline
-		\end{tabular}
-	}
-\end{table}
+Unlike the original Slanting Tree, the version 2 does perform well when using kNN. After adding random forest as the second common classifier the rejection rate has increased almost 5 times. Despite the changes, the obtained solution is still outperformed by previous Slanting Tree constructions (most notably the one using SVM and random forest combination) which questions its usefulness. 
 
 \section{Summary}
 
-All of the classifier trees introduced in this chapter had good classification capabilities, very similar to the plain common classifiers they used. It is worth noting that not only did the classification rate stayed the same, but also rejection capabilities were introduced. Among all classifiers combinations tested it was the Slanting tree using random forests with 100 estimators that performed the best. Table \ref{slanting_tree2_rf_results} shows score achieved by this tree structure. Although being the best, classification rate achieved by this particular Slanting tree may not be considered good, as it's lower than 50\%. At best it could be seen as mediocre. Despite trying different classifiers and their parameters combinations no better solution could be found while using tree structures described in this chapter. The final conclusion can be made that the classifier trees introduced in this paper does not perform well enough to be used as a valid rejection mechanism. While still maintaining high classification rates those structures are slower than other popular classifiers which questions their usefulness.
+All of the classifier trees introduced in this chapter had good classification capabilities, very similar to the plain common classifiers they used. It is worth noting that not only did the classification rate stayed the same, but also rejection capabilities were introduced. Among all classifiers combinations tested it was the Slanting tree using random forests with 100 estimators that performed the best. Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results} show score achieved by this tree structure. Although being the best, classification rate achieved by this particular Slanting Tree may not be considered good, as it's lower than 50\%. At best it could be seen as mediocre. Despite trying different classifiers and their parameters combinations no better solution could be found while using tree structures described in this chapter. The final conclusion can be made that the classifier trees introduced in this paper do not perform well enough to be used as a valid rejection mechanism. While still maintaining high classification rates those structures are slower than other popular classifiers which questions their usefulness.
