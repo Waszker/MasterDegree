@@ -108,7 +108,7 @@ Described in this chapter classifier trees were tested with various common class
 Every common classifier that was used by any of tree nodes was tested with different parameters. SVM had its C, gamma and kernel options adjusted (see Chapter \ref{common_classifiers} for every parameter explanation). Values were as follows \[ C: [ 1, 2, 4, 8, 16 ] \] \[ gamma: [ 2^{-1}, 2^{-2}, 2^{-3}, 2^{-4} ] \]  \[ kernel: [ rbf, poly ] \] 
 Adjustments for kNN were made for only one parameter, using euclidean metrics \[ n\_neighbors: [ 3, 5, 7, 10 ] \]
 Random forests also had modifications applied to one parameter \[ n\_estimators: [ 30, 50, 100, 150 ] \]
-When evaluating results quality evaluation measurements were taken into account (see Chapter \ref{quality_measures}). Best solutions were selected by comparing $ \frac{TP + TN}{2} $ values. In the next few subsections there is short summary for each classifier tree using different internal classifiers.
+When evaluating results quality evaluation measurements were taken into account (see Chapter \ref{quality_measures}). In the next few subsections there is short summary for each classifier tree using different internal classifiers.
 
 \begin{table}[htp]
 	\centering
@@ -156,48 +156,13 @@ When evaluating results quality evaluation measurements were taken into account 
 	}
 \end{table}
 
-\subsection{Balanced Tree}
+Results gathered in Table \ref{classifier_trees_training_results} and Table \ref{classifier_trees_test_results} prove that combining commonly used classifiers by putting them in more complex structures does not affect overall classification capabilities. Of course the quality of determining patterns' affiliations relies mostly on the type of the classifier used, but is also affected by classifier's parameters and the tree structure. 
 
-\subsubsection{SVM}
+Trees using SVM classifier yield better results when using radial basis function (rbf) kernel along with C parameter set to 16 and $\gamma$ to 0.5. During calculations it was observed that the $\gamma$ parameter didn't have as much impact on final results, unlike the C parameter which, when decreasing its value, lowered achieved scores. For Slanting Tree 2 the SVM classifier performed best when paired up with Random Forest which may indicate that both of those classifiers tend to misclassifying different patterns (hence better rejection option rates).
 
-The best results for Balanced tree with SVM classifier are achieved when using polynomial kernel, gamma 0.5 and C parameter value of 16. Generally, for polynomial kernel, better results are achieved when using bigger C values (gamma doesn't have as much impact). Similar conclusion can also be made for rbf kernel, which performs only slightly worse than the polynomial one.
+Using Random Forest classifier yields different scores depending on which tree structure is used. Whereas Balanced Tree performs best when using Random Forest with 30 estimators, both Slanting Tree and Slanting Tree 2 get better results while utilizing classifier with 100 estimators. Interesting may be the fact that the best performing Slanting Tree 2 uses Random Forest combined with SVM classifiers with the exactly same parameters' values as when using SVM classifier backed up by Random Forest one. In both cases results are very similar which proves that those classifiers tend to cooperate well.
 
-\subsubsection{Random Forests}
-
-When using random forest as its classifier the Balanced Tree doesn't improve much. Whereas more native patterns are correctly recognized and assigned their labels, the foreign patterns aren't properly rejected. As it can be seen in the result Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results} Balanced Tree using random forest displays tendency to classify unknown pattern rather than reject it. The presented score was achieved while using random forest classifier with 30 estimators.
-
-\subsubsection{k-Nearest Neighbours}
-
-Unfortunately using kNN classifier doesn't bring any positive changes. Rejection mechanism is almost non-existent and the native pattern classification isn't satisfying. The best results are achieved when using 10 nearest neighbours to determine point affiliation.
-
-\subsection{Slanting Tree}
-
-\subsubsection{SVM}
-
-Unlike Balanced tree using SVM, where either kernel parameter value yields similar results, Slanting Tree works best when using rbf kernel. Bigger gamma values also help maintaining higher foreign patterns rejection rates, although the final results are worse than those achieved by Balanced tree.
-
-\subsubsection{Random Forests}
-
-Slanting Tree performs best when using random forest as its internal classifier. Although it presents excellent classification abilities and the rejection rate is best among all classifier trees tested, it still can be considered only mediocre in terms of usefulness. The results, which are contained within Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results}, were obtained when using 100 estimators for each random forest classifier.
-
-\subsubsection{k-Nearest Neighbours}
-
-Similarly to Balanced tree, using kNN classifier in Slanting Tree does not work as expected. Not only its classification is bad but also rejection does not bring satisfying results, even when using kNN classifiers that takes into consideration only 2 nearest neighbours for each presented, unknown pattern.
-
-
-\subsection{Slanting Tree 2}
-
-\subsubsection{SVM}
-
-Bigger C value again proves to be better when using SVM classifier. Similarly to Balanced Tree, using either polynomial or rbf kernel doesn't have much impact on the final results. This time it is the second common classifier that played crucial part in attaining results presented in Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results}. In every case, when using random forest, both classification and rejection rates are very high, with 30 estimators performing the best.
-
-\subsubsection{Random Forests}
-
-When using random forest as its main classifier, the Slanting Tree 2 scores best result with SVM as the second common classifier. The main similarity between best solution obtained for Slanting Tree 2 using SVM as its main common classifier and the one using random forest is that both of them use in fact the same two classifiers but in a reversed order. After comparing results in both Tables \ref{classifier_trees_training_results} and \ref{classifier_trees_test_results} it can be seen that for Slanting Tree 2 it's better to use SVM backed up by random forests as its rejection rate is higher.
-
-\subsubsection{k-Nearest Neighbours}
-
-Unlike the original Slanting Tree, the version 2 does perform well when using kNN. After adding random forest as the second common classifier the rejection rate has increased almost 5 times. Despite the changes, the obtained solution is still outperformed by previous Slanting Tree constructions (most notably the one using SVM and random forest combination) which questions its usefulness. 
+Unfortunately, among all classifiers tested, the kNN one performs the worst when used in all of the three trees. While this doesn't mean that the classifications rates were very low, in fact the differences between scores achieved by using kNN and SVM or Random Forest were negligible, rejection option was almost non-existent. The best results, achieved by Slanting Tree 2, were obtained when using Random Forest as a second classifier. All results for kNN classifier for each of classifier tree described in this chapter, presented in the tables, were achieved when using $n\_neighbors$ parameter value of 10.
 
 \section{Summary}
 
