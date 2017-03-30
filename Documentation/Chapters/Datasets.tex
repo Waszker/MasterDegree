@@ -1,28 +1,15 @@
 \lhead{\emph{Datasets}}
 \chapter{Datasets} \label{datasets}
 
-All data comes from public MNIST database. Contains scanned letters and digits. Digits create native class and are divided in 7:3 ratio.
-"Projection.V...Raw...Max...Value",
-"Projection.H...Differential...Min...Value",
-"Cumulative.Histogram.V...Raw...Max...Position",
-"Cumulative.Histogram.V...Raw...1st.Moment",
-"Offsets.L...Raw...Max...Value",
-"Offsets.L...Differential...Min...Value",
-"Offsets.L...Differential...Min...Position",
-"Offsets.L...Differential...Max...Value",
-"Offsets.L...Differential...Max...Position",
-"Offsets.L...Differential...1st.Moment",
-"Offsets.R...Raw...Min...Position",
-"Offsets.R...Differential...Max...Value",
-"Offsets.R...Differential...1st.Moment",
-"Offsets.T...Raw...Min...Position",
-"Offsets.T...Differential...Max...Value",
-"Offsets.B...Differential...Min...Position",
-"Directions...90",
-"Directions...45",
-"Raw.Moments...1st...m10",
-"Raw.Moments...1st...m01",
-"Central.Moments...2nd...m20",
-"Central.Moments...2nd...m02",
-"Height.Width",
-"Euler.Number.4”  
+All quality measures described in Chapter \ref{quality_measures} obtained and presented in this paper were calculated from classifiers' results for certain datasets. Those sets, referred to as native and foreign, are the result of applying feature-extraction function to images containing digits and letters. The original data comes from the well-known MNIST database\cite{MNIST}.
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Figures/mnistdigits.jpg}
+	\caption{Visualization of scanned digits from MNIST database, image taken from \cite{Kuan_Hoong_Blog}}
+	\label{fig:mnist_digits}\vspace{-3pt}
+\end{figure}
+
+The native set consists of 10,000 scanned digit images, with ten different classes one for every digit (0 - 9) and approximately 1000 samples for each class. This set is further divided into training and test sets in 7:3 ratio. The foreign set consists of 26,000 images of scanned letters and is not divided internally because it is used only in rejection option evaluation.
+
+Every pattern within those two datasets consists of 24 unique features that were extracted to ensure best classification capabilities. Examples of features are: maximum/position of maximum values of projections, histograms of projections, transitions, offsets; raw moments, central moments, Euler numbers etc. 
