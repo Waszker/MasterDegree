@@ -27,14 +27,14 @@ class Normalizer:
 
         return self._delete_zero_columns(np.asarray(new_data))
 
+    def _delete_zero_columns(self, data):
+        difference = np.tile(np.asarray(self.difference_vector), (2, 1))
+        zero_columns = np.nonzero(difference.sum(axis=0) == 0)
+        return np.delete(data, zero_columns, axis=1)
+
     @staticmethod
     def _get_min_max_vectors(data):
         min_vector = np.amin(data, axis=0)
         max_vector = np.amax(data, axis=0)
 
         return min_vector, max_vector
-
-    def _delete_zero_columns(self, data):
-        difference = np.tile(np.asarray(self.difference_vector), (2, 1))
-        zero_columns = np.nonzero(difference.sum(axis=0) == 0)
-        return np.delete(data, zero_columns, axis=1)

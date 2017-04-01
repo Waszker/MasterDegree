@@ -16,6 +16,9 @@ class SlantingDualTree(SlantingTree):
         self._node_classifier = self.classifier
         self._leaf_classifier = classifiers.classifier_object(leaf_classifier)
 
+    def get_name(self):
+        return "SlantingDualTree"
+
     def _train_classifier_for_leaf(self, node, class_number, parent_node, patterns_by_class):
         node.classifier = copy.deepcopy(self._leaf_classifier)
         native_samples, foreign_samples, labels = SlantingTree._create_training_datasets_and_labels(class_number,

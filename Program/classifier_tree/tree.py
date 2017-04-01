@@ -10,6 +10,10 @@ class BinaryTree:
         self._root = None
 
     @abstractmethod
+    def get_name(self):
+        pass
+
+    @abstractmethod
     def build(self, labels, patterns):
         pass
 

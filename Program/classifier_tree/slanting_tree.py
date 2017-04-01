@@ -21,6 +21,9 @@ class SlantingTree(BinaryTree):
         self.classifier = classifiers.classifier_object(classification_method)
         self._point_generation_method = point_generation_method
 
+    def get_name(self):
+        return "SlantingTree"
+
     def build(self, labels, patterns):
         # TODO: Finish method description
         """

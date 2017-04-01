@@ -2,6 +2,7 @@ import numpy as np
 import copy
 from models import classifiers
 from tree import BinaryTree, Node
+from data_tools.dataset import Dataset
 
 
 class BalancedTree(BinaryTree):
@@ -22,16 +23,16 @@ class BalancedTree(BinaryTree):
         self.clustering = classifiers.clustering_object(clustering_method)
         self.classifier = classifiers.classifier_object(classification_method)
 
+    def get_name(self):
+        return "BalancedTree"
+
     def build(self, labels, patterns):
-        # TODO: Finish method description
         """
-        Builds tree from provided patterns. Patterns are divided into two potential classes...
+        Builds tree from provided patterns.
         :param labels: list of correct data classes for each pattern array row
         :param patterns: row-ordered numpy array data
-        :return:
         """
-        class_representation_points = BalancedTree._get_class_representation_points(labels, patterns)
-        central_points = {c: p for c, p in enumerate(class_representation_points)}
+        central_points = BalancedTree._get_class_representation_points(labels, patterns)
         self._root = self._create_tree_node(central_points, labels, patterns)
 
     def show(self):
@@ -119,14 +120,10 @@ class BalancedTree(BinaryTree):
         :return: list containing cluster numbers for each data class
         """
         class_count = len(central_points.keys())
-        class_representation_points = np.array([row for (_, row) in central_points.iteritems()])
-        clusters = [0, 1]
+        class_representation_points = np.array([central_points[k] for k in central_points.keys()])
+        self.clustering.n_neighbors = class_count
 
-        if class_count > 2:
-            self.clustering.n_neighbors = class_count
-            clusters = self.clustering.fit_predict(class_representation_points, [0, 1])
-
-        return clusters
+        return [0, 1] if class_count <= 2 else self.clustering.fit_predict(class_representation_points, [0, 1])
 
     @staticmethod
     def _fit_node_classifier(node, class_numbers, clusters, labels, patterns):
@@ -178,20 +175,8 @@ class BalancedTree(BinaryTree):
         :return: row-oriented numpy array containing "central class point" for each class
         """
         classes = set(labels)
-        patterns_by_class = {key: value for key, value in zip(classes, [[] for _ in classes])}
-        representation_points = []
-
-        for i, pattern in enumerate(patterns):
-            patterns_by_class[labels[i]].append(pattern)
-
-        for key, patterns_in_class in patterns_by_class.iteritems():
-            patterns_array = np.asarray(patterns_in_class)
-            elements_in_class_count = float(patterns_array.shape[0])
-            columns_count = patterns_array.shape[1]
-            central_class_point = patterns_array.sum(axis=0) / [elements_in_class_count] * columns_count
-            representation_points.append(central_class_point)
-
-        return np.asarray(representation_points)
+        patterns_by_class = {int(c): [p for i, p in enumerate(patterns) if labels[i] == c] for c in classes}
+        return Dataset.calculate_central_points(patterns_by_class)
 
     @staticmethod
     def _show_tree_node(node, level):

@@ -40,3 +40,18 @@ class Dataset:
         test_classes_distribution = test_classes_counter / len(self.test_labels)
 
         return training_classes_distribution, test_classes_distribution
+
+    @staticmethod
+    def calculate_central_points(patterns_by_class):
+        """
+        Calculates central points for each class in provided data.
+        Central points are the average of all points in certain class.
+        :param patterns_by_class: dictionary containing list of patterns for each class number key
+        :return: dictionary containing central points for each class
+        """
+
+        def get_division_vector(c): return [len(patterns_by_class[c])] * len(patterns_by_class[c][0])
+
+        def get_central_point(c): return np.asarray(patterns_by_class[c]).sum(axis=0) / get_division_vector(c)
+
+        return {i: get_central_point(i) for i in patterns_by_class.keys()}

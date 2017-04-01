@@ -9,6 +9,7 @@ from data_tools.normalization import Normalizer
 from classifier_tree.balanced_tree import BalancedTree
 from classifier_tree.slanting_tree import SlantingTree
 from classifier_tree.slanting_dual_tree import SlantingDualTree
+from classifier_tree.slanting_ordered_tree import SlantingOrderedTree
 
 
 def get_result_matrix(tree, patterns, labels, matrix_size):
@@ -20,78 +21,6 @@ def get_result_matrix(tree, patterns, labels, matrix_size):
         result_matrix[int(labels[i])][r] += 1
 
     return result_matrix
-
-
-def run_balanced_tree_test(digits_data, letters_data, classifier, classifier_parameters):
-    print "BalancedTree tests for classifier " + str(classifier) + " with parameters " + str(classifier_parameters)
-    t = BalancedTree(classification_method=(classifier, classifier_parameters), clustering_method=("kmeans", None))
-    t.build(digits_data.training_labels, digits_data.training_data)
-
-    training_matrix = get_result_matrix(t, digits_data.training_data, digits_data.training_labels, (10, 10))
-    test_matrix = get_result_matrix(t, digits_data.test_data, digits_data.test_labels, (10, 10))
-    foreign_matrix = get_result_matrix(t, letters_data, [10] * letters_data.shape[0], (10, 10))
-
-    filename = "../Results/balanced_tree " + str(classifier) + "_" + str(classifier_parameters) + ".csv"
-    np.savetxt(filename, np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0), delimiter=',',
-               fmt='%i')
-
-
-def run_slanting_tree_test(digits_data, letters_data, classifier, classifier_parameters):
-    print "SlantingTree tests for classifier " + str(classifier) + " with parameters " + str(classifier_parameters)
-    t = SlantingTree(classification_method=(classifier, classifier_parameters))
-    t.build(digits_data.training_labels, digits_data.training_data)
-
-    training_matrix = get_result_matrix(t, digits_data.training_data, digits_data.training_labels, (10, 10))
-    test_matrix = get_result_matrix(t, digits_data.test_data, digits_data.test_labels, (10, 10))
-    foreign_matrix = get_result_matrix(t, letters_data, [10] * letters_data.shape[0], (10, 10))
-
-    filename = "../Results/slanting_tree " + str(classifier) + "_" + str(classifier_parameters) + ".csv"
-    np.savetxt(filename, np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0), delimiter=',',
-               fmt='%i')
-
-
-def run_slanting_dual_tree_test(digits_data, letters_data, node_classifier, node_classifier_parameters, leaf_classifier,
-                                leaf_classifier_parameters):
-    print "SlantingDualTree tests for node classifier " + str(node_classifier) + " with parameters " + str(
-        node_classifier_parameters) + " and leaf classifier " + str(leaf_classifier) + " with parameters " + str(
-        leaf_classifier_parameters)
-    t = SlantingDualTree(node_classifier=(node_classifier, node_classifier_parameters),
-                         leaf_classifier=(leaf_classifier, leaf_classifier_parameters))
-    t.build(digits_data.training_labels, digits_data.training_data)
-
-    training_matrix = get_result_matrix(t, digits_data.training_data, digits_data.training_labels, (10, 10))
-    test_matrix = get_result_matrix(t, digits_data.test_data, digits_data.test_labels, (10, 10))
-    foreign_matrix = get_result_matrix(t, letters_data, [10] * letters_data.shape[0], (10, 10))
-
-    filename = "../Results/slanting_dual_tree " + str(node_classifier) + "_" + str(
-        node_classifier_parameters) + "&" + str(leaf_classifier) + "_" + str(leaf_classifier_parameters) + ".csv"
-    np.savetxt(filename, np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0), delimiter=',',
-               fmt='%i')
-
-
-def _run_balanced_tree_calculations(pool, digits_data, letters_data):
-    classifier_parameters_combinations = _get_all_parameters_combinations()
-    for classifier, parameters_combinations in classifier_parameters_combinations.iteritems():
-        for combination in parameters_combinations:
-            pool.apply_async(run_balanced_tree_test, args=(digits_data, letters_data, classifier, dict(combination)))
-
-
-def _run_slanting_tree_calculations(pool, digits_data, letters_data):
-    classifier_parameters_combinations = _get_all_parameters_combinations()
-    for classifier, parameters_combinations in classifier_parameters_combinations.iteritems():
-        for combination in parameters_combinations:
-            pool.apply_async(run_slanting_tree_test, args=(digits_data, letters_data, classifier, dict(combination)))
-
-
-def _run_slanting_dual_tree_calculations(pool, digits_data, letters_data):
-    classifier_parameters_combinations = _get_all_parameters_combinations()
-    for classifier, parameters_combinations in classifier_parameters_combinations.iteritems():
-        for combination in parameters_combinations:
-            for second_classifier, parameters_combinations2 in classifier_parameters_combinations.iteritems():
-                for combination2 in parameters_combinations2:
-                    pool.apply_async(run_slanting_dual_tree_test,
-                                     args=(digits_data, letters_data, classifier, dict(combination),
-                                           second_classifier, dict(combination2)))
 
 
 def _get_all_parameters_combinations():
@@ -109,11 +38,7 @@ def _get_all_parameters_combinations():
             'n_estimators': [30, 50, 100, 150]
         }
     }
-    combinations = {}
-
-    for classifier in classifiers:
-        combinations[classifier] = _get_combinations_list(classifiers[classifier])
-
+    combinations = {classifier: _get_combinations_list(classifiers[classifier]) for classifier in classifiers}
     return combinations
 
 
@@ -136,34 +61,84 @@ def _get_combinations_list(parameters_dictionary, combination=None, all_combinat
     return all_combinations
 
 
+def _calculate_matrix(tree, digits_data, letters_data):
+    tree.build(digits_data.training_labels, digits_data.training_data)
+    training_matrix = get_result_matrix(tree, digits_data.training_data, digits_data.training_labels, (10, 10))
+    test_matrix = get_result_matrix(tree, digits_data.test_data, digits_data.test_labels, (10, 10))
+    foreign_matrix = get_result_matrix(tree, letters_data, [10] * letters_data.shape[0], (10, 10))
+    return np.concatenate((training_matrix, test_matrix, foreign_matrix), axis=0)
+
+
+def _run_test(tree_builder, datasets, arguments):
+    (digits_data, letters_data) = datasets
+    classifier_tree = tree_builder(*arguments)
+    print "Starting test for %s with arguments %s" % (str(classifier_tree.get_name()), str(arguments))
+    result = _calculate_matrix(classifier_tree, digits_data, letters_data)
+    filename = "../Results/%s_%s.csv" % (str(classifier_tree.get_name()), str(arguments))
+    np.savetxt(filename, result, delimiter=',', fmt='%i')
+
+
+def _run_parallel_calculations(tree_builder, digits_data, letters_data):
+    datasets = (digits_data, letters_data)
+    classifier_parameters_combinations = _get_all_parameters_combinations()
+    classifiers = [(classifier, parameters)
+                   for classifier, combinations in classifier_parameters_combinations.iteritems()
+                   for parameters in combinations]
+    [pool.apply_async(_run_test, args=(tree_builder, datasets, classifier)) for classifier in classifiers]
+
+
+def _run_parallel_calculations2(tree_builder, digits_data, letters_data):
+    datasets = (digits_data, letters_data)
+    classifier_parameters_combinations = _get_all_parameters_combinations()
+    classifiers = [(classifier, parameters)
+                   for classifier, combinations in classifier_parameters_combinations.iteritems()
+                   for parameters in combinations]
+    [pool.apply_async(_run_test, args=(tree_builder, datasets, (classifier1, classifier2)))
+     for classifier1 in classifiers for classifier2 in classifiers]
+
+
 if __name__ == "__main__":
     """
     Main program entry function.
     """
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], "123", [])
+        opts, _ = getopt.getopt(sys.argv[1:], "h1234", [])
         if len(opts) == 0: raise getopt.GetoptError("No options specified")
     except getopt.GetoptError as err:
         print str(err)
         sys.exit(1)
 
+    if ('-h', '') in opts:
+        print "Pattern recognition program help:"
+        print "-1: BalancedTree\n-2: SlantingTree\n-3: SlantingDualTree\n-4: SlantingOrderedTree"
+        sys.exit(0)
+
     reader = DatasetReader("../Datasets")
     raw_data = reader.read_digits(filename='digits.csv')
-    data = Dataset(raw_data, division_ratio=0.70)
-    normalizer = Normalizer(data.training_data)
-    data.training_data = normalizer.get_normalized_data_matrix(data.training_data)
-    data.test_data = normalizer.get_normalized_data_matrix(data.test_data)
-    raw_data = reader.read_letters()
-    raw_data = normalizer.get_normalized_data_matrix(raw_data)
+    digits = Dataset(raw_data, division_ratio=0.70)
+    normalizer = Normalizer(digits.training_data)
+    digits.training_data = normalizer.get_normalized_data_matrix(digits.training_data)
+    digits.test_data = normalizer.get_normalized_data_matrix(digits.test_data)
+    letters = reader.read_letters()
+    letters = normalizer.get_normalized_data_matrix(letters)
+
+    # @formatter:off
+    def balancedBuilder(x, y): return BalancedTree(classification_method=(x, y), clustering_method=("kmeans", None))
+    def slantingBuilder(x, y): return SlantingTree(classification_method=(x, y))
+    def slanting2Builder(x, y): return SlantingDualTree(node_classifier=x, leaf_classifier=y)
+    def slanting3Builder(x, y): return SlantingOrderedTree(classification_method=(x, y))
+    # @formatter:on
 
     pool = mp.Pool()
     for o, a in opts:
         if o == "-1":
-            _run_balanced_tree_calculations(pool, data, raw_data)
+            _run_parallel_calculations(balancedBuilder, digits, letters)
         elif o == "-2":
-            _run_slanting_tree_calculations(pool, data, raw_data)
+            _run_parallel_calculations(slantingBuilder, digits, letters)
         elif o == "-3":
-            _run_slanting_dual_tree_calculations(pool, data, raw_data)
+            _run_parallel_calculations2(slanting2Builder, digits, letters)
+        elif o == "-4":
+            _run_parallel_calculations(slanting3Builder, digits, letters)
 
     pool.close()
     pool.join()
