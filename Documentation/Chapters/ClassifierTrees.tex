@@ -78,6 +78,16 @@ Much like previously described Slanting Tree, this one has its nodes arranged in
 
 Creation procedure is mostly the same as in \ref{slanting_tree_implementation}. The only differences are present in nodes creation method where instead of creating new training patterns for the right child node, different classifier type is trained on the same data from the parent node.
 
+\section{Slanting Tree with ordered classes}
+
+\subsection{Description}
+
+The basic Slanting Tree structure assigns classes to its nodes based on an arbitrary, lexicographic order. This approach leaves its implementation vulnerable to situation in which labels changes occur. Slanting Tree with ordered classes tries to circumvent this disadvantage by using minimum volume ellipsoid (MVEE) for sorting classes without the need to know their labels.
+
+\subsection{Implementation details}
+
+
+
 \section{Results}
 
 Described in this chapter classifier trees were tested with various common classifiers: SVM, kNN and random forest, using different parameters. Over 500 tests were held. Results in form of quality measurements (see Chapter \ref{quality_measures}) for training, test and letters sets were gathered in form of two matrices with 12 rows and 10 columns, one for training and one for test data. Each row in the matrix corresponds to one of the quality evaluation measurements, and each column represents value of corresponding measurement scored by certain classifier tree using one of the common classifiers. See Table \ref{example_result_matrix} for reference.
