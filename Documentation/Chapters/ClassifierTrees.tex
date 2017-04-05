@@ -7,6 +7,7 @@ Common classifiers described in the Chapter \ref{common_classifiers} return resu
 \section{Balanced Tree}
 
 \subsection{Structure}
+\label{BalancedTreeStructure}
 
 The main idea behind Balanced Tree structure is to create a graph tree in which every path from root to leaf consists of increasingly precise classifiers. What it means is that every pattern, that should be classified, is tested against certain number of common classifiers, where each subsequent one is clarifying this unknown pattern's affiliation to one of the classes.
 
@@ -82,11 +83,11 @@ Creation procedure is mostly the same as in \ref{slanting_tree_implementation}. 
 
 \subsection{Description}
 
-The basic Slanting Tree structure assigns classes to its nodes based on an arbitrary, lexicographic order. This approach leaves its implementation vulnerable to situation in which labels changes occur. Slanting Tree with ordered classes tries to circumvent this disadvantage by using minimum volume ellipsoid (MVEE) for sorting classes without the need to know their labels.
+The basic Slanting Tree structure assigns classes to its nodes based on an arbitrary, lexicographic order. This approach leaves its implementation vulnerable to situation in which label changes occur. Slanting Tree with ordered classes tries to circumvent this disadvantage by using minimum volume ellipsoid (MVEE)\cite{MVEEMichaelTodd2005} for sorting classes without the need to know their labels. The idea is to sort classes' representatives based on their spatial relations. By constructing ellipsoid enclosing all patterns, the class having its representatives lying closer to the ellipsoid surface is treated as most distinctive and assigned first place in the new order. The process of ellipsoid construction and selecting next class is then repeated until all classes are sorted.
 
 \subsection{Implementation details}
 
-
+Steps required to build Slanting Tree with ordered classes are mostly the same as in \ref{slanting_tree_implementation}. Instead of creating nodes for classes sorted using lexicographic order, MVEE algorithm is used to determine the way those classes should be traversed. To fasten computations of minimum volume ellipsoid only one point, called the representative, for each class is used. Those representatives are calculated the same way as so called central points in \ref{BalancedTreeStructure}, by getting the average value of all training patterns from one class. This way the iterative algorithm constructing ellipsoid converges faster. Sorted class labels are used further during classifier tree creation process the same way as in original Slanting Tree.
 
 \section{Results}
 
