@@ -10,6 +10,7 @@ from classifier_tree.balanced_tree import BalancedTree
 from classifier_tree.slanting_tree import SlantingTree
 from classifier_tree.slanting_dual_tree import SlantingDualTree
 from classifier_tree.slanting_ordered_tree import SlantingOrderedTree
+from geometrical_classifiers.native_ellipsoids import NativeEllipsoids
 
 
 def get_result_matrix(tree, patterns, labels, matrix_size):
@@ -102,7 +103,7 @@ if __name__ == "__main__":
     Main program entry function.
     """
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], "h1234", [])
+        opts, _ = getopt.getopt(sys.argv[1:], "h123456", [])
         if len(opts) == 0: raise getopt.GetoptError("No options specified")
     except getopt.GetoptError as err:
         print str(err)
@@ -110,7 +111,8 @@ if __name__ == "__main__":
 
     if ('-h', '') in opts:
         print "Pattern recognition program help:"
-        print "-1: BalancedTree\n-2: SlantingTree\n-3: SlantingDualTree\n-4: SlantingOrderedTree"
+        print "-1: BalancedTree\n-2: SlantingTree\n-3: SlantingDualTree\n-4: SlantingOrderedTree\n-5:NativeEllipsoids" \
+              "\n-6:NativeEllipsoids (Confusion Matrix)"
         sys.exit(0)
 
     reader = DatasetReader("../Datasets")
@@ -123,22 +125,32 @@ if __name__ == "__main__":
     letters = normalizer.get_normalized_data_matrix(letters)
 
     # @formatter:off
-    def balancedBuilder(x, y): return BalancedTree(classification_method=(x, y), clustering_method=("kmeans", None))
-    def slantingBuilder(x, y): return SlantingTree(classification_method=(x, y))
-    def slanting2Builder(x, y): return SlantingDualTree(node_classifier=x, leaf_classifier=y)
-    def slanting3Builder(x, y): return SlantingOrderedTree(classification_method=(x, y))
+    def balanced_builder(x, y): return BalancedTree(classification_method=(x, y), clustering_method=("kmeans", None))
+    def slanting_builder(x, y): return SlantingTree(classification_method=(x, y))
+    def slanting2_builder(x, y): return SlantingDualTree(node_classifier=x, leaf_classifier=y)
+    def slanting3_builder(x, y): return SlantingOrderedTree(classification_method=(x, y))
     # @formatter:on
 
     pool = mp.Pool()
     for o, a in opts:
         if o == "-1":
-            _run_parallel_calculations(balancedBuilder, digits, letters)
+            _run_parallel_calculations(balanced_builder, digits, letters)
         elif o == "-2":
-            _run_parallel_calculations(slantingBuilder, digits, letters)
+            _run_parallel_calculations(slanting_builder, digits, letters)
         elif o == "-3":
-            _run_parallel_calculations2(slanting2Builder, digits, letters)
+            _run_parallel_calculations2(slanting2_builder, digits, letters)
         elif o == "-4":
-            _run_parallel_calculations(slanting3Builder, digits, letters)
+            _run_parallel_calculations(slanting3_builder, digits, letters)
+        elif o == "-5":
+            ellipsoids = NativeEllipsoids(digits)
+            results = np.asarray(ellipsoids.get_results(letters), dtype=float)
+            filename = "../Results/native_ellipsoids.csv"
+            np.savetxt(filename, results, delimiter=',', fmt='%f')
+        elif o == "-6":
+            ellipsoids = NativeEllipsoids(digits)
+            matrix = ellipsoids.get_confusion_matrix(letters, tolerance=0.001)
+            filename = "../Results/native_ellipsoids2.csv"
+            np.savetxt(filename, matrix, delimiter=',', fmt='%i')
 
     pool.close()
     pool.join()

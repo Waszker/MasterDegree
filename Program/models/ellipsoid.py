@@ -10,7 +10,7 @@ class Ellipsoid:
     def __init__(self, points, tolerance=0.001):
         """
         Constructs ellipsoid using provided points.
-        :param points: row-ordered matrix of points
+        :param points: list of lists (denoting points in n-dimensional space)
         :param tolerance: stop parameter for ellipsoid construction algorithm
         """
         self.a, self.c = self._mvee(points, tolerance)

@@ -20,6 +20,18 @@ class Dataset:
         self.training_data = np.delete(training_data, 0, 1)
         self.test_data = np.delete(test_data, 0, 1)
 
+    def get_patterns_by_class(self):
+        """
+        Returns two dictionaries with keys being the class labels and the values being list of patterns from this class.
+        :return: two dictionaries for training and test set
+        """
+        native_classes = set(self.training_labels)
+        training = {k: [p for i, p in enumerate(self.training_data) if self.training_labels[i] == k] for k in
+                    native_classes}
+        test = {k: [p for i, p in enumerate(self.test_data) if self.test_labels[i] == k] for k in native_classes}
+
+        return training, test
+
     def get_classes_distribution(self):
         """
         Calculates classes distribution for each data set. Evenly distributed classes help in training and testing
