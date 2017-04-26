@@ -1,0 +1,50 @@
+\lhead{\emph{Identifier Arrays}}
+\chapter{Identifier Arrays}
+
+The easiest and probably most intuitive way of dealing with classification task is to use patterns' spatial relations in order to determine their class memberships. This approach is used for example in kNN and SVM models, where point's affiliation is calculated based on its place in the features space. Every class in a dataset can be represented as a big ``cloud`` of points and usually, if the other clouds do not overlap each other, the more dense this cloud is, the easier the task of classification gets.
+
+Each class' cloud can be enclosed in an arbitrary geometrical shape which can be used as an identifier. The difference between binary classifiers and identifiers is very subtle, yet important. Whereas binary classifiers can distinguish between patterns from two different classes, they must be trained on data consisting of elements from both classes. Identifiers accept (or one could say: identify) only those points that they were constructed on, and reject any outliers. Thus they require only one class to be provided during training process. One of the easiest and most intuitive model of identifier is minimum volume enclosing figure. Creating figure enclosing all elements that has the smallest volume possible ensures that the identification can be very strict, which in return helps to maintain high outlier rejection rate. As opposed to convex hull, which is the most accurate point set container with smallest volume and which is enclosed by linear hyperplanes, bounding figures are far less complex. In many cases, when there is a need for computing convex hull and testing inclusions of other points, an approximation of such hull can be used, which helps in reducing time needed for computations, since most of alternative methods have lower construction and inclusion-testing complexities. Among the most popular minimum volume enclosing figures there are: boxes, diamonds, simplexes and ellipsoids.
+
+\section{Minimum Volume Enclosing Ellipsoid}
+
+Minimum Volume Enclosing Ellipsoid (denoted as MVEE) problem is solved by several known algorithms that can be categorized as first-order, second-order interior-point or combination of the two. For small dimensions \textit{d}, the MVEE problem can be solved in \textit{O($d^{O(d)}$m)} operations using randomized or deterministic algorithms~\cite{MVEEMichaelTodd2005}. In this paper the algorithm based on Khachiyan solution is used.
+
+An ellipsoid in its centre form is given by the formula:
+\vspace{-6pt} 
+\[ 
+\vspace{-3pt}
+E = \{x \in \mathbb{R}^{n} | (x - c)^{T}A(x-c) \le 1\} 
+\vspace{-3pt}
+\] 
+where $c \in \mathbb{R}^{n}$ is the centre of the ellipse E and $ A \in \mathbb{S}^{n}_{++}$ is a positive definite matrix. Points lying inside the ellipsoid satisfy $(x_{i} - c)^{T}A(x_{i} - c) \le 1 + \varepsilon$, where $\varepsilon$ parameter defines the error margin in determining point belonging to ellipsoid, i.e. it allows to enlarge the ellipsoid.% It can be imagined as testing point inclusion on enlarged ellipsoid.
+
+However, constructing minimal volume bounding ellipsoid is not a convex optimization problem. It turns out that the solution is not easily obtainable so the dual problem has to be found. For a more precise and in depth solution description see \cite{MVEEMichaelTodd2005}. The main problem, when using ellipsoids as identifiers, lies in constructing them. Two main factors that decide about identification effectiveness are tolerance and acceptance parameters. Tolerance can be viewed as a threshold for ellipsoid construction accuracy. The lower the parameter is, the better minimal volume ellipsoid is created. On the other hand, even with a good training set, there is a risk of including native patterns that lie outside of the created ellipsoid. Acceptance parameter has been introduced to prevent such unwanted behaviour. It defines a threshold for point rejection for points lying outside of the created figure.
+
+\section{Ellipsoids array classifier}
+
+The construction of a classifier constructed by using array of identifiers is pretty simple and straightforward. The array is filled with ellipsoids, one for each class in the training dataset. Every unknown pattern, sent for classification, moves through those ellipsoids and gets the information whether it lies inside the ellipsoid or not. In case of being part of identifier's interior the value given by the equation (?) is taken into consideration, which tells about the position inside the ellipsoid (where value 0 means that the point is in the ellipsoid's centre and 1 that it lies on the surface). Finally, after all ellipsoids have been checked, the one with the smallest equation (?) value and for which the point lies inside it, designates the class to which this unknown pattern should be classified to. In case when no ellipsoids accepted the point, it is rejected and treated as a foreign element.
+%TODO: Add equation numbering
+
+\section{Results}
+
+The tests were performed and their results were stored in the same manner as in similar tests in previous chapters. The classification and rejection rates for identifier array using ellipsoids are very high.
+
+\begin{table}[htp]
+	\centering
+	\caption{Results obtained for Ellipsoid arrays}
+	\label{ellipsoid_arrays_results}
+	\begin{tabular}{l|c|lll}
+		\cline{2-2}
+		& \multicolumn{1}{l|}{\textbf{Ellipsoid}} &  &  &  \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Strict Accuracy}}           & 88.28 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Fine Accuracy}}             & 93.14 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Strict Native Sensitivity}} & 83.95 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Accuracy}}                  & 89.98 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Native Precision}}          & 77.23 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Native Sensitivity}}        & 90.13 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 83.18 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Foreign Precision}}         & 96.01 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Foreign Sensitivity}}       & 89.93 \\ \cline{1-2}
+		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 92.87 \\ \cline{1-2}
+	\end{tabular}
+\end{table}
