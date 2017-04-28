@@ -36,6 +36,7 @@ class NativeEllipsoids:
         """
         Returns confusion matrix for native and (optionally) foreign elements by traversing array of ellipsoids.
         :param foreign_elements: optional list of elements that should be rejected during classification process
+        :param tolerance: float value that impacts ellipsoid tolerance for outliers identification
         :return: confusion matrix in form of list of lists of int values
         """
 

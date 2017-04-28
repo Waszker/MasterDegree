@@ -16,18 +16,19 @@ An ellipsoid in its centre form is given by the formula:
 E = \{x \in \mathbb{R}^{n} | (x - c)^{T}A(x-c) \le 1\} 
 \vspace{-3pt}
 \] 
-where $c \in \mathbb{R}^{n}$ is the centre of the ellipse E and $ A \in \mathbb{S}^{n}_{++}$ is a positive definite matrix. Points lying inside the ellipsoid satisfy $(x_{i} - c)^{T}A(x_{i} - c) \le 1 + \varepsilon$, where $\varepsilon$ parameter defines the error margin in determining point belonging to ellipsoid, i.e. it allows to enlarge the ellipsoid.% It can be imagined as testing point inclusion on enlarged ellipsoid.
+where $c \in \mathbb{R}^{n}$ is the centre of the ellipse E and $ A \in \mathbb{S}^{n}_{++}$ is a positive definite matrix. Points lying inside the ellipsoid satisfy 
+\begin{equation}\label{eq:ellipsoid_affiliation}(x_{i} - c)^{T}A(x_{i} - c) \le 1 + \varepsilon\end{equation}
+where $\varepsilon$ parameter defines the error margin in determining point belonging to ellipsoid, i.e. it allows to enlarge the ellipsoid.% It can be imagined as testing point inclusion on enlarged ellipsoid.
 
 However, constructing minimal volume bounding ellipsoid is not a convex optimization problem. It turns out that the solution is not easily obtainable so the dual problem has to be found. For a more precise and in depth solution description see \cite{MVEEMichaelTodd2005}. The main problem, when using ellipsoids as identifiers, lies in constructing them. Two main factors that decide about identification effectiveness are tolerance and acceptance parameters. Tolerance can be viewed as a threshold for ellipsoid construction accuracy. The lower the parameter is, the better minimal volume ellipsoid is created. On the other hand, even with a good training set, there is a risk of including native patterns that lie outside of the created ellipsoid. Acceptance parameter has been introduced to prevent such unwanted behaviour. It defines a threshold for point rejection for points lying outside of the created figure.
 
 \section{Ellipsoids array classifier}
 
-The construction of a classifier constructed by using array of identifiers is pretty simple and straightforward. The array is filled with ellipsoids, one for each class in the training dataset. Every unknown pattern, sent for classification, moves through those ellipsoids and gets the information whether it lies inside the ellipsoid or not. In case of being part of identifier's interior the value given by the equation (?) is taken into consideration, which tells about the position inside the ellipsoid (where value 0 means that the point is in the ellipsoid's centre and 1 that it lies on the surface). Finally, after all ellipsoids have been checked, the one with the smallest equation (?) value and for which the point lies inside it, designates the class to which this unknown pattern should be classified to. In case when no ellipsoids accepted the point, it is rejected and treated as a foreign element.
-%TODO: Add equation numbering
+The construction of a classifier constructed by using array of identifiers is pretty simple and straightforward. The array is filled with ellipsoids, one for each class in the training dataset. Every unknown pattern, sent for classification, moves through those ellipsoids and gets the information whether it lies inside the ellipsoid or not. In case of being part of identifier's interior the value given by the equation (\ref{eq:ellipsoid_affiliation}) is taken into consideration, which tells about the position inside the ellipsoid (where value 0 means that the point is in the ellipsoid's centre and 1 means that it lies on the surface). Finally, after all ellipsoids are checked, the one with the smallest equation (\ref{eq:ellipsoid_affiliation}) value (and for which the point lies inside it), designates the class to which this unknown pattern should be classified to. If no ellipsoids accept the point, it is rejected and treated as a foreign element.
 
 \section{Results}
 
-The tests were performed and their results were stored in the same manner as in similar tests in previous chapters. The classification and rejection rates for identifier array using ellipsoids are very high.
+The tests were performed and their results were stored in the same manner as in similar tests in previous chapters. The classification and rejection rates for identifier array using ellipsoids are very good, staying within 85\% - 95\% value.
 
 \begin{table}[htp]
 	\centering
@@ -48,3 +49,5 @@ The tests were performed and their results were stored in the same manner as in 
 		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 92.87 \\ \cline{1-2}
 	\end{tabular}
 \end{table}
+
+Although it may seem that the ellipsoids are superior to other classifiers presented and used in this paper it is worth noting that the tests were performed on only one dataset. Geometric classifiers that work on raw data, without introducing any changes to feature values given during training don't work well in situations when class elements overlap. SVM, random forest, etc. which should used in such cases have the advantage over simple classifiers like kNN or arrays of minimum volume enclosing figures, because they change the way features are interpreted. For example, SVM increase dimensionality by using kernel function to introduce such feature-space representation in which two different classes are easily separated by a hyperplane.
