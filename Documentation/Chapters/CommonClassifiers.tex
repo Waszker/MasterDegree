@@ -60,13 +60,20 @@ It is worth noting though that in some cases, where the number of features is mu
 
 \section{Random Forest}
 
-Random forest is a~popular ensemble method. The main principle behind ensemble methods, in general, is that a~group of ``weak learners'' can come together to form a~``strong learner''. In the random forest algorithm~\cite{Breiman2001} the weak learners are decision trees, which are used to predict class labels. A decision tree is a decision support tool that uses a tree-like graph for classification issue. Each graph node performs a test on an attribute of the provided pattern and sends it to its child node via a branch that represents the outcome of the test. Each leaf in a decision tree represents a certain class label. In other words for a~feature vector representing one pattern a~decision tree calculates its class label by dividing value space into two or more subspaces. More precisely, an input data is entered at the top of the tree and as it traverses down the tree the data gets bucketed into smaller subsets. There are many advantages of using decision trees. Their results are easy to interpret and visualize in form of a graph, they can handle multi class classification problems and perform well even if its assumptions are somewhat violated by the true model from which the data were generated. On the other hand, the main drawbacks connected to their usage consist of overfitting problem caused by creating too complex trees on a very complicated data, and instability caused by small variations in the data that might result in a completely different tree being generated. That last problem is easily mitigated by ensembling set of decision trees into a random forest. 
-
 \begin{figure}[htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/rf_visualization_funny.jpg}
 	\caption{A funny example of a decision tree}
 	\label{fig:rf_visualization_funny}\vspace{-3pt}
+\end{figure}
+
+Random forest is a~popular ensemble method. The main principle behind ensemble methods, in general, is that a~group of ``weak learners'' can come together to form a~``strong learner''. In the random forest algorithm~\cite{Breiman2001} the weak learners are decision trees, which are used to predict class labels. A decision tree is a decision support tool that uses a tree-like graph for classification issue. Each graph node performs a test on an attribute of the provided pattern and sends it to its child node via a branch that represents the outcome of the test. Each leaf in a decision tree represents a certain class label. In other words for a~feature vector representing one pattern a~decision tree calculates its class label by dividing value space into two or more subspaces. More precisely, an input data is entered at the top of the tree and as it traverses down the tree the data gets bucketed into smaller subsets. There are many advantages of using decision trees. Their results are easy to interpret and visualize in form of a graph, they can handle multi class classification problems and perform well even if its assumptions are somewhat violated by the true model from which the data were generated. On the other hand, the main drawbacks connected to their usage consist of overfitting problem caused by creating too complex trees on a very complicated data, and instability caused by small variations in the data that might result in a completely different tree being generated. That last problem is easily mitigated by ensembling set of decision trees into a random forest. 
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.85\textwidth]{Figures/rf_visualization.jpg}
+	\caption{Visualization of a random forest consisting of $B$ different decision trees}
+	\label{fig:rf_visualization}\vspace{-3pt}
 \end{figure}
 
 In the random forest a~large number of classification trees is formed, which altogether serve as a~classifier. In order to grow each tree, a~random selection of rows from the training set is drawn. Random sampling with replacement is also called bootstrap sampling. In addition, when constructing trees for a~random forest at each node $m$~variables out of the set of all input variables are randomly selected, and the best split on these $m$~is used to split the node. After a~relatively large number of trees is generated, they vote for the most popular class. Some of the parameters used for improving classification rates that are available within scikit-learn package random forest implementation:
@@ -79,10 +86,3 @@ In the random forest a~large number of classification trees is formed, which alt
 \end{itemize}
 
 Random forests join few important benefits: (a)~they are relatively prone to the influence of outliers, (b)~they have an embedded ability of feature selection, (c)~they are prone to missing values, and (d)~they are prone to over-fitting.
-
-\begin{figure}[htp]
-	\centering
-	\includegraphics[width=1.0\textwidth]{Figures/rf_visualization.jpg}
-	\caption{Visualization of a random forest consisting of $B$ different decision trees}
-	\label{fig:rf_visualization}\vspace{-3pt}
-\end{figure}
