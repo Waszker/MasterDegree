@@ -1,0 +1,102 @@
+\documentclass[12pt,twoside,a4paper]{article}
+% ten dokument należy kompilować za pomocą XeLaTeX-a. Trzeba mieć zainstalowane w systemie czcionki Arial i Arial Narrow
+
+\usepackage[utf8]{inputenc}
+\usepackage[small,sf,bf]{titlesec}
+
+\usepackage{indentfirst}
+\setlength{\parindent}{5mm}
+
+\usepackage{hyphenat}
+\hyphenation{in-for-ma-cyj-nych}
+
+\usepackage{polski}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{a4wide}
+\geometry{left=20mm,right=20mm,bindingoffset=10mm, top=25mm, bottom=25mm}
+
+
+
+
+\linespread{1.5}
+ 
+ 
+\usepackage{amsfonts}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{latexsym,xpatch}
+\usepackage{mathrsfs}
+\usepackage{enumerate}
+\usepackage{verbatim}
+\usepackage{textcomp}
+\usepackage{multirow}
+
+
+
+\def\university{POLITECHNIKA WARSZAWSKA}
+\def\faculty{WYDZIAL MATEMATYKI I NAUK \\ INFORMACYJNYCH}
+\def\type{magisters}
+\def\discipline{Informatyka}
+\def\spec{Metody Sztucznej Inteligencji}
+\def\title{Rejection Option in Pattern Recognition Problem - Selected Issues}
+\def\author{inż. Piotr Waszkiewicz}
+\def\supervisor{dr hab. inż. Władysław Homenda}
+\def\album{254218}
+\def\year{2017}
+
+\begin{document}
+\sloppy
+\pagestyle{empty}
+
+
+
+\includegraphics[scale=1.]{Figures/politechnika} 
+
+\begin{center}
+\vspace{70pt}
+
+
+\includegraphics[scale=1.]{Figures/praca_mgr} % 
+
+{  na kierunku \discipline
+
+\vspace{40pt}
+{ \large \title}
+
+\vspace{50pt}
+
+{ \huge \author}
+
+\vspace{5pt}
+
+Numer albumu \album
+
+\vspace{40pt}
+
+promotor \\
+{ \supervisor}
+
+\vspace{15pt}
+ 
+
+ \vfill
+WARSZAWA \year \\
+}
+\end{center}
+
+
+\newpage
+\null
+
+\vfill
+
+\begin{center}
+\begin{tabular}[t]{ccc}
+............................................. & \hspace*{100pt} & .............................................\\
+podpis promotora & \hspace*{100pt} & podpis autora
+\end{tabular}
+\end{center}
+
+
+\end{document}

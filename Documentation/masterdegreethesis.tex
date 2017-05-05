@@ -1,185 +1,100 @@
-%% ----------------------------------------------------------------
-%% Thesis.tex -- MAIN FILE (the one that you compile with LaTeX)
-%% ---------------------------------------------------------------- 
-
-% Set up the document
-\documentclass[a4paper, 11pt, oneside]{Thesis}  % Use the "Thesis" style, based on the ECS Thesis style by Steve Gunn
+\documentclass[en]{minipw} % wszystkie ustawienia szablonu są w minipw.cls; if in English, change [pl] to [en]
 \graphicspath{Figures/}  % Location of the graphics files (set up for graphics to be in PDF format)
-
-% Include any extra LaTeX packages required
+\allowdisplaybreaks
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst}
+\usepackage{pdfpages}
 \usepackage[square, numbers, comma, sort&compress]{natbib}  % Use the "Natbib" style for the references in the Bibliography
 \usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
 \usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
 \usepackage{multirow}
 \usepackage{hyperref}
-\usepackage[table,xcdraw]{xcolor}
-\hypersetup{urlcolor=blue, colorlinks=true}  % Colours hyperlinks in blue, but this can be distracting if there are many links.
-\usepackage[font=small,labelfont=bf,
-justification=justified,
-format=plain]{caption} % 'format=plain' avoids hanging indentation
+\setlength{\parindent}{5mm} % wcięcie akapitowe 5mm, zarządzenie Rektora
 
-%% ----------------------------------------------------------------
+
+% ------------ Ustawienia autora pracy ---------------
+
+\setboolean{lady}{false} % kobiety wpisują true, mężczyźni - false
+
+\title{Rejection Option in Pattern Recognition Problem - Selected Issues} % nazwa pracy
+\titleaux{Problem rozpoznawania wzorców z odrzucaniem elementów obcych – wybrane zagadnienia}
+\type{magisters} % licencjat = licencjac, inżynier = inżyniers
+\discipline{Informatyka} % kierunek
+\specjal{Metody Sztucznej Inteligencji}
+\author{inż. Piotr Waszkiewicz}
+\album{254218}
+\supervisor{dr hab. inż. Władysław Homenda}
+% \konsultacje{prof. Dumbledore} % jeśli nie ma, trzeba zakomentować też w minipw.cls
+\date{2017}
+% ----------------------------------------------------
+
 \begin{document}
-\frontmatter      % Begin Roman style (i, ii, iii, iv...) page numbering
+\pagenumbering{gobble}
+\sloppy
+	
+% Nowy układ pracy dyplomowej
+	
+% 1. Strona tytułowa - trzeba wydrukować z osobnego pliku
+% \maketitle
+\includepdf[pages={1-},scale=1.]{strona_tytulowa_mgr.pdf}
+	
+	
+	
+% 2. Streszczenia
+% Streszczenie ma zawierać tytuł pracy i słowa kluczowe
+% if in English, English abstract goes first
+	
+%\selectlanguage{polish}
+\setcounter{page}{1}
+	
+{\selectlanguage{english}
+	\begin{abstract}
+			
+		An analysis of the presented study seeks a solution to a common problem in a classification issue, which is detecting and rejecting data not suited for classification. Contaminated data that emerges from noisy environment can lead to a situation in which even well trained models yield bad results. This is a serious problem for processes that rely on a classifiers' efficiency in which rejecting received data is more acceptable than classifying it wrongly, e.g. tumour detection algorithm should refuse to make medical evaluation of provided image if it is too blurry rather than trying to guess patient's health condition. \\
+			
+		Although artificial intelligence gained much importance and is used in many aspects of humans life (even outside of pure scientific fields), there's still a need for newer approaches and methods. Commonly used algorithms and models change very frequently as new problems arise. Study presented in this thesis introduces modifications to some of the oldest and well known techniques and tries to combine them in order to create tools with much higher capabilities. \\
+		
+		\noindent \textbf{Keywords:} keyword1, keyword2, ...
+\end{abstract}}
 
-% Set up the Title Page
-\title  {Rejection Option in Pattern Recognition Problem - Selected Issues}
-\authors  {\texorpdfstring
-            {\href{waszkiewiczp@student.mini.pw.edu.pl}{Piotr Waszkiewicz}}
-            {Piotr Waszkiewicz}
-            }
-\addresses  {\groupname\\\deptname\\\univname}  % Do not change this here, instead these must be set in the "Thesis.cls" file, please look through it instead
-\date       {\today}
-\subject    {}
-\keywords   {}
-
-\maketitle
-%% ----------------------------------------------------------------
-
-\setstretch{1.3}  % It is better to have smaller font and larger line spacing than the other way round
-
-% Define the page headers using the FancyHdr package and set up for one-sided printing
-\fancyhead{}  % Clears all page headers and footers
-\rhead{\thepage}  % Sets the right side header to show the page number
-\lhead{}  % Clears the left side page header
-
-\pagestyle{fancy}  % Finally, use the "fancy" page style to implement the FancyHdr headers
-
-%% ----------------------------------------------------------------
-% Declaration Page required for the Thesis, your institution may give you a different text to place here
-\Declaration{
-
-\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
-
-I, Piotr Waszkiewicz, declare that this thesis titled, `Rejection Option in Pattern Recognition Problem - Selected Issues' and the work presented in it are my own. I confirm that:
-
-\begin{itemize} 
-\item[\tiny{$\blacksquare$}] This work was done wholly or mainly while in candidature for a research degree at this University.
- 
-\item[\tiny{$\blacksquare$}] Where any part of this thesis has previously been submitted for a degree or any other qualification at this University or any other institution, this has been clearly stated.
- 
-\item[\tiny{$\blacksquare$}] Where I have consulted the published work of others, this is always clearly attributed.
- 
-\item[\tiny{$\blacksquare$}] Where I have quoted from the work of others, the source is always given. With the exception of such quotations, this thesis is entirely my own work.
- 
-\item[\tiny{$\blacksquare$}] I have acknowledged all main sources of help.
- 
-\item[\tiny{$\blacksquare$}] Where the thesis is based on work done by myself jointly with others, I have made clear exactly what was done by others and what I have contributed myself.
-\\
-\end{itemize}
- 
- 
-Signed:\\
-\rule[1em]{25em}{0.5pt}  % This prints a line for the signature
- 
-Date:\\
-\rule[1em]{25em}{0.5pt}  % This prints a line to write the date
-}
-\clearpage  % Declaration ended, now start a new page
-
-%% ----------------------------------------------------------------
-% The "Funny Quote Page"
-% \pagestyle{empty}  % No headers or footers for the following pages
-
-% \null\vfill
-% Now comes the "Funny Quote", written in italics
-% \textit{``Write a funny quote here.''}
-
-% \begin{flushright}
-% If the quote is taken from someone, their name goes here
-% \end{flushright}
-
-% \vfill\vfill\vfill\vfill\vfill\vfill\null
-% \clearpage  % Funny Quote page ended, start a new page
-%% ----------------------------------------------------------------
-
-% The Abstract Page
-\addtotoc{Abstract}  % Add the "Abstract" page entry to the Contents
-\abstract{
-\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
-
-An analysis of the presented study seeks a solution to a common problem in a classification issue, which is detecting and rejecting data not suited for classification. Contaminated data that emerges from noisy environment can lead to a situation in which even well trained models yield bad results. This is a serious problem for processes that rely on a classifiers' efficiency in which rejecting received data is more acceptable than classifying it wrongly, e.g. tumor detection algorithm should refuse to make medical evaluation of provided image if it is too blurry rather than trying to guess patient's health condition. \\
-
-Although artificial intelligence gained much importance and is used in many aspects of humans life (even outside of pure scientific fields), there's still a need for newer approaches and methods. Commonly used algorithms and models change very frequently as new problems arise. Study presented in this thesis introduces modifications to some of the oldest and well known techniques and tries to combine them in order to create tools with much higher capabilities.
-
-}
-
-\clearpage  % Abstract ended, start a new page
-%% ----------------------------------------------------------------
-
-\setstretch{1.3}  % Reset the line-spacing to 1.3 for body text (if it has changed)
-
-% The Acknowledgements page, for thanking everyone
-\acknowledgements{
-\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
-
-The acknowledgements and the people to thank go here, don't forget to include your project advisor\ldots
-
-}
-\clearpage  % End of the Acknowledgements
-%% ----------------------------------------------------------------
-
-\pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
-
-
-%% ----------------------------------------------------------------
-\lhead{\emph{Contents}}  % Set the left side page header to "Contents"
+\begin{abstract}
+	
+	Streszczam. Blebleble.
+	
+	Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumyeirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diamvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.\\
+	
+	\noindent \textbf{Słowa kluczowe:} slowo1, slowo2, ...
+\end{abstract}
+	
+% 2. Oświadczenie o autorstwie pracy - w innym pliku
+\makestatement
+	
+% Table of Contents
+\cleardoublepage
 \tableofcontents  % Write out the Table of Contents
 
-%% ----------------------------------------------------------------
-\lhead{\emph{List of Figures}}  % Set the left side page header to "List if Figures"
+% Table of Figures
+\cleardoublepage
 \listoffigures  % Write out the List of Figures
 
-%% ----------------------------------------------------------------
-\lhead{\emph{List of Tables}}  % Set the left side page header to "List of Tables"
+% List of Tables
+\cleardoublepage
 \listoftables  % Write out the List of Tables
-
-%% ----------------------------------------------------------------
-\setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
-% \clearpage  % Start a new page
-% \lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
-% \listofsymbols{ll}  % Include a list of Abbreviations (a table of two columns)
-% {
-% \textbf{Acronym} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or \\
-% \textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere \\
-% }
-
-%% ----------------------------------------------------------------
-% \clearpage  % Start a new page
-% \lhead{\emph{Physical Constants}}  % Set the left side page header to "Physical Constants"
-% \listofconstants{lrcl}  % Include a list of Physical Constants (a four column table)
-% {
-% Constant Name & Symbol & = & Constant Value (with units) \\
-% Speed of Light & $c$ & $=$ & $2.997\ 924\ 58\times10^{8}\ \mbox{ms}^{-\mbox{s}}$ (exact)\\
-% }
-
-%% ----------------------------------------------------------------
-% \clearpage  %Start a new page
-% \lhead{\emph{Symbols}}  % Set the left side page header to "Symbols"
-% \listofnomenclature{lll}  % Include a list of Symbols (a three column table)
-% {
-% symbol & name & unit \\
-% $a$ & distance & m \\
-% $P$ & power & W (Js$^{-1}$) \\
-% & & \\ % Gap to separate the Roman symbols from the Greek
-% $\omega$ & angular frequency & rads$^{-1}$ \\
-% }
-%% ----------------------------------------------------------------
-% End of the pre-able, contents and lists of things
-% Begin the Dedication page
-
-% \setstretch{1.3}  % Return the line spacing back to 1.3
-% \pagestyle{empty}  % Page style needs to be empty for this page
-% \dedicatory{For/Dedicated to/To my\ldots}
-% \addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+	
+% 5. Treść
+	
+\cleardoublepage
+\pagestyle{fancy}
 
 
 %% ----------------------------------------------------------------
-\mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
+% \mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
 \pagestyle{fancy}  % Return the page headers back to the "fancy" style
 
 % Include the chapters of the thesis, as separate files
 % Just uncomment the lines as you write the chapters
+\pagenumbering{arabic}
 
 \input{Chapters/Chapter1} % Introduction
 
@@ -217,7 +132,7 @@ The acknowledgements and the people to thank go here, don't forget to include yo
 %\input{Appendices/AppendixC} % Appendix Title
 
 \addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
-\backmatter
+\pagenumbering{gobble}
 
 %% ----------------------------------------------------------------
 \label{Bibliography}
@@ -225,5 +140,4 @@ The acknowledgements and the people to thank go here, don't forget to include yo
 \bibliographystyle{unsrtnat}  % Use the "unsrtnat" BibTeX style for formatting the Bibliography
 \bibliography{Bibliography}  % The references (bibliography) information are stored in the file named "Bibliography.bib"
 
-\end{document}  % The End
-%% ----------------------------------------------------------------
+\end{document}
