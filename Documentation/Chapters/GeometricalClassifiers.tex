@@ -26,6 +26,13 @@ However, constructing minimal volume bounding ellipsoid is not a convex optimiza
 
 The construction of a classifier constructed by using array of identifiers is pretty simple and straightforward. The array is filled with ellipsoids, one for each class in the training dataset. Every unknown pattern, sent for classification, moves through those ellipsoids and gets the information whether it lies inside the ellipsoid or not. In case of being part of identifier's interior the value given by the equation (\ref{eq:ellipsoid_affiliation}) is taken into consideration, which tells about the position inside the ellipsoid (where value 0 means that the point is in the ellipsoid's centre and 1 means that it lies on the surface). Finally, after all ellipsoids are checked, the one with the smallest equation (\ref{eq:ellipsoid_affiliation}) value (and for which the point lies inside it), designates the class to which this unknown pattern should be classified to. If no ellipsoid accepts the point, it is rejected and treated as a foreign element.
 
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/ellipsoids_array_example.png}
+	\caption{ Array of ellipsoids that works as a classifier with rejection capabilities. Elements outside of existing ellipsoids are treated as a foreign patterns. }
+	\label{fig:ellipsoids_array}\vspace{-3pt}
+\end{figure}
+
 \section{Results}
 
 The tests were performed and their results were stored in the same manner as in similar tests in previous chapters. The classification and rejection rates for identifier array using ellipsoids are very good, staying within 85\% - 95\% value.

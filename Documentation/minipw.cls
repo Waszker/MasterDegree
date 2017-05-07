@@ -10,7 +10,7 @@
 \newif\ifmyclass@en
 \DeclareOption{en}{\myclass@entrue}
 \DeclareOption{pl}{\myclass@enfalse}
-\ExecuteOptions{pl}
+\ExecuteOptions{en}
 \ProcessOptions\relax
 
 \DeclareOption{lady}{\setboolean{lady}{true}}
