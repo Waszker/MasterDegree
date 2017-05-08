@@ -1,7 +1,7 @@
 \lhead{\emph{Identifier Arrays}}
 \chapter{Identifier Arrays}
 
-The easiest and probably most intuitive way of dealing with classification task is to use patterns' spatial relations in order to determine their class memberships. This approach is used for example in kNN and SVM models, where point's affiliation is calculated based on its place in the features space. Every class in a dataset can be represented as a big ``cloud`` of points and usually, if the other clouds do not overlap each other, the more dense this cloud is, the easier the task of classification gets.
+The easiest and probably most intuitive way of dealing with classification task is to use patterns' spatial relations in order to determine their class memberships. This approach is used for example in kNN and SVM models, where point's affiliation is calculated based on its place in the features space. Every class in a dataset can be viewed as a big ``cloud`` of points and usually, if the other clouds do not overlap each other, the more dense this cloud is, the easier the task of classification gets.
 
 Each class' cloud can be enclosed in an arbitrary geometrical shape which can be used as an identifier. The difference between binary classifiers and identifiers is very subtle, yet important. Whereas binary classifiers can distinguish between patterns from two different classes, they must be trained on data consisting of elements from both classes. Identifiers accept (or one could say: identify) only those points that they were constructed on, and reject any outliers. Thus they require only one class to be provided during training process. One of the easiest and most intuitive model of identifier is minimum volume enclosing figure. Creating figure enclosing all elements that has the smallest volume possible ensures that the identification can be very strict, which in return helps to maintain high outlier rejection rate. As opposed to convex hull, which is the most accurate point set container with smallest volume and which is enclosed by linear hyperplanes, bounding figures are far less complex. In many cases, when there is a need for computing convex hull and testing inclusions of other points, an approximation of such hull can be used, which helps in reducing time needed for computations, since most of alternative methods have lower construction and inclusion-testing complexities. Among the most popular minimum volume enclosing figures there are: boxes, diamonds, simplexes and ellipsoids.
 
@@ -24,7 +24,9 @@ However, constructing minimal volume bounding ellipsoid is not a convex optimiza
 
 \section{Ellipsoids array classifier}
 
-The construction of a classifier constructed by using array of identifiers is pretty simple and straightforward. The array is filled with ellipsoids, one for each class in the training dataset. Every unknown pattern, sent for classification, moves through those ellipsoids and gets the information whether it lies inside the ellipsoid or not. In case of being part of identifier's interior the value given by the equation (\ref{eq:ellipsoid_affiliation}) is taken into consideration, which tells about the position inside the ellipsoid (where value 0 means that the point is in the ellipsoid's centre and 1 means that it lies on the surface). Finally, after all ellipsoids are checked, the one with the smallest equation (\ref{eq:ellipsoid_affiliation}) value (and for which the point lies inside it), designates the class to which this unknown pattern should be classified to. If no ellipsoid accepts the point, it is rejected and treated as a foreign element.
+The construction of a classifier using array of identifiers is pretty simple and straightforward. The array is filled with ellipsoids, one for each class in the training dataset. Every unknown pattern, sent for classification, moves through those ellipsoids and gets the information whether it lies inside the ellipsoid or not. In case of being part of identifier's interior the value given by the equation (\ref{eq:ellipsoid_affiliation}) is taken into consideration, which tells about the position inside the ellipsoid (where value 0 means that the point is in the ellipsoid's centre and 1 means that it lies on the surface). Finally, after all ellipsoids are checked, the one with the smallest equation (\ref{eq:ellipsoid_affiliation}) value (and for which the point lies inside it), designates the class to which this unknown pattern should be classified to. If no ellipsoid accepts the point, it is rejected and treated as a foreign element. 
+
+One way of increasing rejection ratio would be to decrease ellipsoid size. The smaller the volume the less points lie inside, which in turn boosts rejection rates but worsens classification. Changing ellipsoid size can be helpful in a situation in which two classes overlap and rejection of the elements is more desired result than misclassification.
 
 \begin{figure}[htp]
 	\centering
@@ -32,6 +34,7 @@ The construction of a classifier constructed by using array of identifiers is pr
 	\caption{ Array of ellipsoids that works as a classifier with rejection capabilities. Elements outside of existing ellipsoids are treated as a foreign patterns. }
 	\label{fig:ellipsoids_array}\vspace{-3pt}
 \end{figure}
+
 
 \section{Results}
 
@@ -58,3 +61,7 @@ The tests were performed and their results were stored in the same manner as in 
 \end{table}
 
 Although it may seem that the ellipsoids are superior to other classifiers presented and used in this paper it is worth noting that the tests were performed on only one dataset. Geometric classifiers that work on raw data, without introducing any changes to feature values given during training don't work well in situations when class elements overlap. SVM, random forest, etc. which should be used in such cases have the advantage over simple classifiers like kNN or arrays of minimum volume enclosing figures, because they change the way features are interpreted. For example, SVM increases dimensionality by using kernel function to introduce such feature-space representation in which two different classes are easily separated by a hyperplane.
+
+\section{Summary}
+
+The tests performed on the classifier using array of identifiers prove that it can successfully combine classification and rejection tasks. While being unable to do the multi-class classification on their own, combined ellipsoids can be very accurate at classification and rejecting foreigners. Minimum volume enclosing ellipsoids combine advantages of commonly used classifiers described in Chapter \ref{common_classifiers} such as easy point inclusion detection, and iterative construction algorithm that uses tolerance parameter for its stop condition. The main disadvantage of ellipsoid, and minimum volume enclosing figures in general, is the fact that it does not transform the feature space of presented data. In order to get good results the data should be separable, and no generalisation of information is done at all. This is completely different from the attitude introduced in random forest or svm.
