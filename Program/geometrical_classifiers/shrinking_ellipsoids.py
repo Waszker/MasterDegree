@@ -21,7 +21,7 @@ class ShrinkingEllipsoid(NativeEllipsoids):
         """
         NativeEllipsoids.__init__(self, dataset)
         self.foreign_elements = foreign_elements
-        self.ellipsoid_tolerance = 1e-3
+        self.ellipsoid_tolerance = 1.
 
     def perform_tests(self, steps=10, shrinking_option=ShrinkingOption.TOLERANCE_MANIPULATION):
         """
@@ -37,7 +37,7 @@ class ShrinkingEllipsoid(NativeEllipsoids):
         natives = list(training)
         [natives[i].extend(test[i]) for i in xrange(len(training))]
 
-        for step in xrange(steps):
+        for step in xrange(1, steps+1):
             [results[i].append(self._get_ratios(natives[i], ellipsoid)) for i, ellipsoid in enumerate(ellipsoids)]
             ellipsoids = [self._shrink_ellipsoid(training[i], ellipsoid, shrinking_option, step=step)
                           for i, ellipsoid in enumerate(ellipsoids)]

@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 else ShrinkingEllipsoid.ShrinkingOption.ELEMENTS_REJECTION
             results = np.asarray(ellipsoids.perform_tests(steps=100, shrinking_option=shrinking_option), dtype=float)
             for i in xrange(results.shape[0]):
-                filename = "../Results/shrinking_ellipsoids_%i.csv" % i
+                filename = "../Results/%s_shrinking_ellipsoids_%i.csv" % (o[1], i)
                 np.savetxt(filename, results[i, ...], delimiter=',', fmt='%f')
 
     pool.close()
