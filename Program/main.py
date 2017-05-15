@@ -104,7 +104,7 @@ if __name__ == "__main__":
     Main program entry function.
     """
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], "h1234567", [])
+        opts, _ = getopt.getopt(sys.argv[1:], "h12345678", [])
         if len(opts) == 0: raise getopt.GetoptError("No options specified")
     except getopt.GetoptError as err:
         print str(err)
@@ -113,7 +113,8 @@ if __name__ == "__main__":
     if ('-h', '') in opts:
         print "Pattern recognition program help:"
         print "-1: BalancedTree\n-2: SlantingTree\n-3: SlantingDualTree\n-4: SlantingOrderedTree\n-5:NativeEllipsoids" \
-              "\n-6:NativeEllipsoids (Confusion Matrix)\n-7:ShrinkingEllipsoids"
+              "\n-6:NativeEllipsoids (confusion matrix)\n-7:ShrinkingEllipsoids (tolerance manipulation)" \
+              "\n-8:ShrinkingEllipsoids (element rejection)"
         sys.exit(0)
 
     reader = DatasetReader("../Datasets")
@@ -152,12 +153,14 @@ if __name__ == "__main__":
             matrix = ellipsoids.get_confusion_matrix(letters, tolerance=0.001)
             filename = "../Results/native_ellipsoids2.csv"
             np.savetxt(filename, matrix, delimiter=',', fmt='%i')
-        elif o == "-7":
+        elif o == "-7" or o == "-8":
             ellipsoids = ShrinkingEllipsoid(digits, letters)
-            print ellipsoids.perform_tests(steps=10,
-                                           shrinking_option=ShrinkingEllipsoid.ShrinkingOption.ELEMENTS_REJECTION)
-            #filename = "../Results/shrinking_ellipsoids.csv"
-            #np.savetxt(filename, matrix, delimiter=',', fmt='%i')
+            shrinking_option = ShrinkingEllipsoid.ShrinkingOption.TOLERANCE_MANIPULATION if o == "-7" \
+                else ShrinkingEllipsoid.ShrinkingOption.ELEMENTS_REJECTION
+            results = np.asarray(ellipsoids.perform_tests(steps=100, shrinking_option=shrinking_option), dtype=float)
+            for i in xrange(results.shape[0]):
+                filename = "../Results/shrinking_ellipsoids_%i.csv" % i
+                np.savetxt(filename, results[i, ...], delimiter=',', fmt='%f')
 
     pool.close()
     pool.join()

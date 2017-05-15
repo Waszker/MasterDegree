@@ -64,7 +64,7 @@ class ShrinkingEllipsoid(NativeEllipsoids):
         elif shrinking_option is self.ShrinkingOption.ELEMENTS_REJECTION:
             elements_removed = 5
             distances = [ellipsoid.calculate_distance(pattern) for pattern in training]
-            too_big_distance = sorted(list(distances))[-1 * (elements_removed * step)]
+            too_big_distance = sorted(distances)[-1 * (elements_removed * step)]
             new_ellipsoid = MVEE([pattern for i, pattern in enumerate(training) if distances[i] < too_big_distance])
         else:
             raise TypeError("Unsupported shrinking_option value")
