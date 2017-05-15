@@ -11,6 +11,7 @@ from classifier_tree.slanting_tree import SlantingTree
 from classifier_tree.slanting_dual_tree import SlantingDualTree
 from classifier_tree.slanting_ordered_tree import SlantingOrderedTree
 from geometrical_classifiers.native_ellipsoids import NativeEllipsoids
+from geometrical_classifiers.shrinking_ellipsoids import ShrinkingEllipsoid
 
 
 def get_result_matrix(tree, patterns, labels, matrix_size):
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     Main program entry function.
     """
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], "h123456", [])
+        opts, _ = getopt.getopt(sys.argv[1:], "h1234567", [])
         if len(opts) == 0: raise getopt.GetoptError("No options specified")
     except getopt.GetoptError as err:
         print str(err)
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     if ('-h', '') in opts:
         print "Pattern recognition program help:"
         print "-1: BalancedTree\n-2: SlantingTree\n-3: SlantingDualTree\n-4: SlantingOrderedTree\n-5:NativeEllipsoids" \
-              "\n-6:NativeEllipsoids (Confusion Matrix)"
+              "\n-6:NativeEllipsoids (Confusion Matrix)\n-7:ShrinkingEllipsoids"
         sys.exit(0)
 
     reader = DatasetReader("../Datasets")
@@ -151,6 +152,12 @@ if __name__ == "__main__":
             matrix = ellipsoids.get_confusion_matrix(letters, tolerance=0.001)
             filename = "../Results/native_ellipsoids2.csv"
             np.savetxt(filename, matrix, delimiter=',', fmt='%i')
+        elif o == "-7":
+            ellipsoids = ShrinkingEllipsoid(digits, letters)
+            print ellipsoids.perform_tests(steps=10,
+                                           shrinking_option=ShrinkingEllipsoid.ShrinkingOption.ELEMENTS_REJECTION)
+            #filename = "../Results/shrinking_ellipsoids.csv"
+            #np.savetxt(filename, matrix, delimiter=',', fmt='%i')
 
     pool.close()
     pool.join()

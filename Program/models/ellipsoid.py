@@ -18,7 +18,7 @@ class Ellipsoid:
     def calculate_error(self, points, tolerance=0.001):
         """
         Calculates collective error (outliers rate) for provided points set.
-        :param points: rwo-ordered points matrix
+        :param points: row-ordered points matrix
         :param tolerance: tolerance for point distance value
         :return: float number with error rate
         """
