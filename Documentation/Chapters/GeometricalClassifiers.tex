@@ -62,6 +62,33 @@ The tests were performed and their results were stored in the same manner as in 
 
 Although it may seem that the ellipsoids are superior to other classifiers presented and used in this paper it is worth noting that the tests were performed on only one dataset. Geometric classifiers that work on raw data, without introducing any changes to feature values given during training don't work well in situations when class elements overlap. SVM, random forest, etc. which should be used in such cases have the advantage over simple classifiers like kNN or arrays of minimum volume enclosing figures, because they change the way features are interpreted. For example, SVM increases dimensionality by using kernel function to introduce such feature-space representation in which two different classes are easily separated by a hyperplane.
 
+\section{Optimizing ellipsoid size}
+
+One thing worth noting when using ellipsoids is that their size can be easily enlarged when having few points that are located far away from their class centre. This situation can lead to decrease in rejection option rates as well as bigger misclassification between native elements' classes. Of course decreasing ellipsoid size can result in the opposite situation. The key to deal with this difficulty is to find balance between decreasing ellipsoid size and still getting high rejection and classification rates. Two approaches are proposed in this paper.
+
+\subsection{Tolerance parameter manipulation}
+
+The tolerance parameter, also named as $\varepsilon$ in Equation (\ref{eq:ellipsoid_affiliation}), can be used during point affiliation check-up to manipulate the result of the equation. By decreasing its value the ellipsoid ``shrinks`` evenly in all directions, and by increasing it more points are accepted as if they were lying inside the ellipsoid. Overall 10 tests there were performed with $\varepsilon$ consecutive values being~$(2^{0}, 2^{-1}, 2^{-2}, \dots, 2^{-10})$. The results can be seen in Figure \ref{fig:shrinking_ellipsoids_tolerance_manipulation}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/shrinking_ellipsoid_tolerance_manipulation.png}
+	\caption{ Classification and rejection rates for different $\varepsilon$ value  }
+	\label{fig:shrinking_ellipsoids_tolerance_manipulation}\vspace{-3pt}
+\end{figure}
+
+\subsection{Native elements rejection}
+
+The problem with manipulating the tolerance parameter is that ...
+Another approach towards shrinking ellipsoids
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Figures/shrinking_ellipsoid_elements_rejection.png}
+	\caption{  }
+	\label{fig:shrinking_ellipsoids_elements_rejection}\vspace{-3pt}
+\end{figure}
+
 \section{Summary}
 
 The tests performed on the classifier using array of identifiers prove that it can successfully combine classification and rejection tasks. While being unable to do the multi-class classification on their own, combined ellipsoids can be very accurate at classification and rejecting foreigners. Minimum volume enclosing ellipsoids combine advantages of commonly used classifiers described in Chapter \ref{common_classifiers} such as easy point inclusion detection, and iterative construction algorithm that uses tolerance parameter for its stop condition. The main disadvantage of ellipsoid, and minimum volume enclosing figures in general, is the fact that it does not transform the feature space of presented data. In order to get good results the data should be separable, and no generalisation of information is done at all. This is completely different from the attitude introduced in random forest or svm.
