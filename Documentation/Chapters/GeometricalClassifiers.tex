@@ -68,24 +68,23 @@ One thing worth noting when using ellipsoids is that their size can be easily en
 
 \subsection{Tolerance parameter manipulation}
 
-The tolerance parameter, also named as $\varepsilon$ in Equation (\ref{eq:ellipsoid_affiliation}), can be used during point affiliation check-up to manipulate the result of the equation. By decreasing its value the ellipsoid ``shrinks`` evenly in all directions, and by increasing it more points are accepted as if they were lying inside the ellipsoid. Overall 10 tests there were performed with $\varepsilon$ consecutive values being~$(2^{0}, 2^{-1}, 2^{-2}, \dots, 2^{-10})$. The results can be seen in Figure \ref{fig:shrinking_ellipsoids_tolerance_manipulation}
+The tolerance parameter, also named as $\varepsilon$ in Equation (\ref{eq:ellipsoid_affiliation}), can be used during point affiliation check-up to manipulate the result of the equation. By decreasing its value the ellipsoid ``shrinks`` evenly in all directions, and by increasing it more points are accepted as if they were lying inside the ellipsoid. Overall 100 tests there were performed with $\varepsilon$ consecutive values being~$(1, 0.98, 0.96, \dots, -1)$. The results can be seen in Figure \ref{fig:shrinking_ellipsoids_tolerance_manipulation}
 
 \begin{figure}[htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/shrinking_ellipsoid_tolerance_manipulation.png}
-	\caption{ Classification and rejection rates for different $\varepsilon$ value  }
+	\caption{ Classification and rejection rates for different $\varepsilon$ values }
 	\label{fig:shrinking_ellipsoids_tolerance_manipulation}\vspace{-3pt}
 \end{figure}
 
-\subsection{Native elements rejection}
+\subsection{Native elements removal}
 
-The problem with manipulating the tolerance parameter is that ...
-Another approach towards shrinking ellipsoids
+The problem with manipulating the tolerance parameter is that the shape of the ellipsoid stays the same for the whole time. This is not a desired solution in a situation in which some of the patterns are located far from the rest of native elements in the same class, which results in bigger ellipsoid but mostly empty inside. In such case it should be better to ignore those points and prefer smaller volume ellipsoid with worse classification capabilities. This approach has been tested by checking classification and rejection rates for ellipsoids built on increasingly smaller datasets. Each step of the shrinking ellipsoid algorithm consists of creating ellipsoid for certain number of patterns. Those elements are sorted base on the inclusion testing function value (Equation \ref{eq:ellipsoid_affiliation}), and 5 most distant ones are removed from the set. The classification and rejection rates are obtained based on the new ellipsoid created on this smaller set and the whole procedure is repeated. The results of this algorithm, which can be seen in Figure \ref{fig:shrinking_ellipsoids_elements_rejection}, were obtained for 100 steps which resulted (in the 100th step) in 500 elements removed from the original data set.
 
 \begin{figure}[htp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Figures/shrinking_ellipsoid_elements_rejection.png}
-	\caption{  }
+	\caption{ Classification and rejection rates for each native element removal step. In each step 5 elements were deleted from the set resulting in overall 500 elements removed in the final 100th step. }
 	\label{fig:shrinking_ellipsoids_elements_rejection}\vspace{-3pt}
 \end{figure}
 
