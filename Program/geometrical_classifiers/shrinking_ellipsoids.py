@@ -58,7 +58,7 @@ class ShrinkingEllipsoid(NativeEllipsoids):
         others = [patterns for i, class_elements in enumerate(native_elements) if i != native_class
                   for patterns in class_elements]
         classification_rate = 1.0 - ellipsoid.calculate_error(np.asmatrix(native_elements[native_class]), tolerance)
-        native_sensitivity = classification_rate - (1.0 - ellipsoid.calculate_error(np.asmatrix(others), tolerance))
+        native_sensitivity = 1.0 - ellipsoid.calculate_error(np.asmatrix(others), tolerance)
         rejection_rate = ellipsoid.calculate_error(np.asmatrix(self.foreign_elements), self.ellipsoid_tolerance)
 
         return classification_rate, native_sensitivity, rejection_rate
