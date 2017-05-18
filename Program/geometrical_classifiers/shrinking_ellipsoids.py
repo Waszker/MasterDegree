@@ -38,9 +38,11 @@ class ShrinkingEllipsoid(NativeEllipsoids):
         [natives[i].extend(test[i]) for i in xrange(len(training))]
 
         for step in xrange(1, steps+1):
-            [results[i].append(self._get_ratios(natives[i], ellipsoid)) for i, ellipsoid in enumerate(ellipsoids)]
+            [results[i].append(self._get_ratios(i, natives, ellipsoid)) for i, ellipsoid in enumerate(ellipsoids)]
             ellipsoids = [self._shrink_ellipsoid(training[i], ellipsoid, shrinking_option, step=step)
                           for i, ellipsoid in enumerate(ellipsoids)]
+            if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
+                self.ellipsoid_tolerance -= 0.02
 
         self.ellipsoid_tolerance = original_ellipsoid_tolerance
 
@@ -51,16 +53,20 @@ class ShrinkingEllipsoid(NativeEllipsoids):
         natives_training, natives_test = [training[k] for k in training.keys()], [test[k] for k in test.keys()]
         return natives_training, natives_test
 
-    def _get_ratios(self, native_elements, ellipsoid):
-        classification_rate = 1.0 - ellipsoid.calculate_error(np.asmatrix(native_elements), self.ellipsoid_tolerance)
+    def _get_ratios(self, native_class, native_elements, ellipsoid):
+        tolerance = self.ellipsoid_tolerance
+        others = [patterns for i, class_elements in enumerate(native_elements) if i != native_class
+                  for patterns in class_elements]
+        classification_rate = 1.0 - ellipsoid.calculate_error(np.asmatrix(native_elements[native_class]), tolerance)
+        native_sensitivity = classification_rate - (1.0 - ellipsoid.calculate_error(np.asmatrix(others), tolerance))
         rejection_rate = ellipsoid.calculate_error(np.asmatrix(self.foreign_elements), self.ellipsoid_tolerance)
 
-        return classification_rate, rejection_rate
+        return classification_rate, native_sensitivity, rejection_rate
 
     def _shrink_ellipsoid(self, training, ellipsoid, shrinking_option, step=1):
         new_ellipsoid = ellipsoid
         if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
-            self.ellipsoid_tolerance /= 2.
+            pass
         elif shrinking_option is self.ShrinkingOption.ELEMENTS_REJECTION:
             elements_removed = 5
             distances = [ellipsoid.calculate_distance(pattern) for pattern in training]
