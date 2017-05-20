@@ -1,7 +1,7 @@
 \lhead{\emph{Identifier Arrays}}
 \chapter{Identifier Arrays}
 
-The easiest and probably most intuitive way of dealing with classification task is to use patterns' spatial relations in order to determine their class memberships. This approach is used for example in kNN and SVM models, where point's affiliation is calculated based on its place in the features space. Every class in a dataset can be viewed as a big ``cloud`` of points and usually, if the other clouds do not overlap each other, the more dense this cloud is, the easier the task of classification gets.
+The easiest and probably most intuitive way of dealing with classification task is using patterns' spatial relations in order to determine their class memberships. This approach is used for example in kNN and SVM models, where point's affiliation is calculated based on its place in the features space. Every class in a dataset can be viewed as a big ``cloud`` of points and usually, if the other clouds do not overlap each other, the more dense this cloud is, the easier the task of classification gets.
 
 Each class' cloud can be enclosed in an arbitrary geometrical shape which can be used as an identifier. The difference between binary classifiers and identifiers is very subtle, yet important. Whereas binary classifiers can distinguish between patterns from two different classes, they must be trained on data consisting of elements from both classes. Identifiers accept (or one could say: identify) only those points that they were constructed on, and reject any outliers. Thus they require only one class to be provided during training process. One of the easiest and most intuitive model of identifier is minimum volume enclosing figure. Creating figure enclosing all elements that has the smallest volume possible ensures that the identification can be very strict, which in return helps to maintain high outlier rejection rate. As opposed to convex hull, which is the most accurate point set container with smallest volume and which is enclosed by linear hyperplanes, bounding figures are far less complex. In many cases, when there is a need for computing convex hull and testing inclusions of other points, an approximation of such hull can be used, which helps in reducing time needed for computations, since most of alternative methods have lower construction and inclusion-testing complexities. Among the most popular minimum volume enclosing figures there are: boxes, diamonds, simplexes and ellipsoids.
 
@@ -16,7 +16,7 @@ An ellipsoid in its centre form is given by the formula:
 E = \{x \in \mathbb{R}^{n} | (x - c)^{T}A(x-c) \le 1\} 
 \vspace{-3pt}
 \] 
-where $c \in \mathbb{R}^{n}$ is the centre of the ellipse E and $ A \in \mathbb{S}^{n}_{++}$ is a positive definite matrix. Points lying inside the ellipsoid satisfy 
+where $c \in \mathbb{R}^{n}$ is the centre of the ellipse E and $ A $ is a positive definite matrix. Points lying inside the ellipsoid satisfy 
 \begin{equation}\label{eq:ellipsoid_affiliation}(x_{i} - c)^{T}A(x_{i} - c) \le 1 + \varepsilon\end{equation}
 where $\varepsilon$ parameter defines the error margin in determining whether certain point belongs to ellipsoid. It can also be used ``enlarge`` the ellipsoid (by increasing $\varepsilon$ value).% It can be imagined as testing point inclusion on enlarged ellipsoid.
 
