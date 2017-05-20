@@ -1,5 +1,5 @@
 from slanting_tree import SlantingTree
-from models.ellipsoid import MVEE
+from models.minimum_volume_figures.ellipsoid import MVEE
 from data_tools.dataset import Dataset
 
 

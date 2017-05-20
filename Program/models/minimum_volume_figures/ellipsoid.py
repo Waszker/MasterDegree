@@ -1,8 +1,9 @@
 import numpy as np
 import numpy.linalg as la
+from minimum_volume_figure import MinimumVolumeFigure
 
 
-class Ellipsoid:
+class Ellipsoid(MinimumVolumeFigure):
     """
     Class representing minimum volume enclosing ellipsoid classifier.
     """
@@ -13,17 +14,8 @@ class Ellipsoid:
         :param points: list of lists (denoting points in n-dimensional space)
         :param tolerance: stop parameter for ellipsoid construction algorithm
         """
+        MinimumVolumeFigure.__init__(self)
         self.a, self.c = self._mvee(points, tolerance)
-
-    def calculate_error(self, points, tolerance=0.001):
-        """
-        Calculates collective error (outliers rate) for provided points set.
-        :param points: row-ordered points matrix
-        :param tolerance: tolerance for point distance value
-        :return: float number with error rate
-        """
-        counter = [(1 if self.calculate_distance(point) > (1. + tolerance) else 0) for point in points]
-        return float(sum(counter)) / len(points)
 
     def calculate_distance(self, point):
         """

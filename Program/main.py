@@ -10,8 +10,9 @@ from classifier_tree.balanced_tree import BalancedTree
 from classifier_tree.slanting_tree import SlantingTree
 from classifier_tree.slanting_dual_tree import SlantingDualTree
 from classifier_tree.slanting_ordered_tree import SlantingOrderedTree
-from geometrical_classifiers.native_ellipsoids import NativeEllipsoids
-from geometrical_classifiers.shrinking_ellipsoids import ShrinkingEllipsoid
+from geometrical_classifiers.native_figures import NativeFigures
+from geometrical_classifiers.shrinking_figures import ShrinkingFigures
+from models.minimum_volume_figures.hyper_rectangle import HyperRectangle
 
 
 def get_result_matrix(tree, patterns, labels, matrix_size):
@@ -144,19 +145,19 @@ if __name__ == "__main__":
         elif o == "-4":
             _run_parallel_calculations(slanting3_builder, digits, letters)
         elif o == "-5":
-            ellipsoids = NativeEllipsoids(digits)
+            ellipsoids = NativeFigures(digits)
             results = np.asarray(ellipsoids.get_results(letters), dtype=float)
             filename = "../Results/native_ellipsoids.csv"
             np.savetxt(filename, results, delimiter=',', fmt='%f')
         elif o == "-6":
-            ellipsoids = NativeEllipsoids(digits)
+            ellipsoids = NativeFigures(digits)
             matrix = ellipsoids.get_confusion_matrix(letters, tolerance=0.001)
             filename = "../Results/native_ellipsoids2.csv"
             np.savetxt(filename, matrix, delimiter=',', fmt='%i')
         elif o == "-7" or o == "-8":
-            ellipsoids = ShrinkingEllipsoid(digits, letters)
-            shrinking_option = ShrinkingEllipsoid.ShrinkingOption.TOLERANCE_MANIPULATION if o == "-7" \
-                else ShrinkingEllipsoid.ShrinkingOption.ELEMENTS_REJECTION
+            ellipsoids = ShrinkingFigures(digits, letters, minimum_volume_figure_class=HyperRectangle)
+            shrinking_option = ShrinkingFigures.ShrinkingOption.TOLERANCE_MANIPULATION if o == "-7" \
+                else ShrinkingFigures.ShrinkingOption.ELEMENTS_REJECTION
             results = np.asarray(ellipsoids.perform_tests(steps=100, shrinking_option=shrinking_option), dtype=float)
             for i in xrange(results.shape[0]):
                 filename = "../Results/%s_shrinking_ellipsoids_%i.csv" % (o[1], i)
