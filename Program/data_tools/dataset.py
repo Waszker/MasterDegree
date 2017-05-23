@@ -19,18 +19,14 @@ class Dataset:
         self.test_labels = [row[0] for row in test_data]
         self.training_data = np.delete(training_data, 0, 1)
         self.test_data = np.delete(test_data, 0, 1)
+        self.training_by_class, self.test_by_class = self.get_patterns_by_class()
 
     def get_patterns_by_class(self):
         """
         Returns two dictionaries with keys being the class labels and the values being list of patterns from this class.
         :return: two dictionaries for training and test set
         """
-        native_classes = set(self.training_labels)
-        training = {k: [p for i, p in enumerate(self.training_data) if self.training_labels[i] == k] for k in
-                    native_classes}
-        test = {k: [p for i, p in enumerate(self.test_data) if self.test_labels[i] == k] for k in native_classes}
-
-        return training, test
+        return self.training_by_class, self.test_by_class
 
     def get_classes_distribution(self):
         """
@@ -52,6 +48,14 @@ class Dataset:
         test_classes_distribution = test_classes_counter / len(self.test_labels)
 
         return training_classes_distribution, test_classes_distribution
+
+    def _get_patterns_by_class(self):
+        native_classes = set(self.training_labels)
+        training = {k: [p for i, p in enumerate(self.training_data) if self.training_labels[i] == k] for k in
+                    native_classes}
+        test = {k: [p for i, p in enumerate(self.test_data) if self.test_labels[i] == k] for k in native_classes}
+
+        return training, test
 
     @staticmethod
     def calculate_central_points(patterns_by_class):
