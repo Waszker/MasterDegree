@@ -19,7 +19,7 @@ class Dataset:
         self.test_labels = [row[0] for row in test_data]
         self.training_data = np.delete(training_data, 0, 1)
         self.test_data = np.delete(test_data, 0, 1)
-        self.training_by_class, self.test_by_class = self.get_patterns_by_class()
+        self.training_by_class, self.test_by_class = self._get_patterns_by_class_()
 
     def get_patterns_by_class(self):
         """
@@ -49,7 +49,7 @@ class Dataset:
 
         return training_classes_distribution, test_classes_distribution
 
-    def _get_patterns_by_class(self):
+    def _get_patterns_by_class_(self):
         native_classes = set(self.training_labels)
         training = {k: [p for i, p in enumerate(self.training_data) if self.training_labels[i] == k] for k in
                     native_classes}
