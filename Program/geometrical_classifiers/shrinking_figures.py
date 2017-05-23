@@ -38,7 +38,7 @@ class ShrinkingFigures(NativeFigures):
         natives = list(training)
         [natives[i].extend(test[i]) for i in xrange(len(training))]
 
-        for step in xrange(1, steps+1):
+        for step in xrange(1, steps + 1):
             [results[i].append(self._get_ratios(i, natives, figure)) for i, figure in enumerate(figures)]
             figures = [self._shrink_figure(training[i], figure, shrinking_option, step=step)
                        for i, figure in enumerate(figures)]
@@ -46,6 +46,33 @@ class ShrinkingFigures(NativeFigures):
                 self.figure_tolerance -= 0.02
 
         self.figure_tolerance = original_figure_tolerance
+
+        return results
+
+    def perform_tests2(self, steps=10, shrinking_option=ShrinkingOption.TOLERANCE_MANIPULATION):
+        """
+        Performs rejection and classification ratios tests on decreasing figure.
+        :param steps: number of shrinking steps to make
+        :param shrinking_option: ShrinkingOption enumerator defining shrinking algorithm
+        :return: list of tuples containing strict native and foreign accuracies
+        """
+        original_figure_tolerance = self.figure_tolerance
+        original_figures = self.figures
+        results = []
+        training, test = self._create_native_lists()
+        natives = list(training)
+        [natives[i].extend(test[i]) for i in xrange(len(training))]
+
+        for step in xrange(1, steps + 1):
+            matrix = self.get_confusion_matrix(self.foreign_elements, self.figure_tolerance)
+            results.append(self._get_ratios_from_matrix(matrix))
+            self.figures = [self._shrink_figure(training[i], figure, shrinking_option, step=step)
+                            for i, figure in enumerate(self.figures)]
+            if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
+                self.figure_tolerance -= 0.02
+
+        self.figure_tolerance = original_figure_tolerance
+        self.figures = original_figures
 
         return results
 
@@ -63,6 +90,20 @@ class ShrinkingFigures(NativeFigures):
         rejection_rate = figure.calculate_error(np.asmatrix(self.foreign_elements), self.figure_tolerance)
 
         return classification_rate, native_sensitivity, rejection_rate
+
+    def _get_ratios_from_matrix(self, confusion_matrix):
+        matrix = confusion_matrix
+        correctly_classified = sum([matrix[i][i] for i in xrange(len(matrix) - 1)])
+        correctly_native = sum([matrix[i][j] for i in xrange(len(matrix) - 1) for j in xrange(len(matrix[i]) - 1)])
+        correctly_rejected = matrix[-1][-1]
+        all_native = len(self.dataset.training_data) + len(self.dataset.test_data)
+        all_foreign = len(self.foreign_elements)
+
+        classification = float(correctly_classified) / all_native
+        identification = float(correctly_native) / all_native
+        rejection = float(correctly_rejected) / all_foreign
+
+        return classification, identification, rejection
 
     def _shrink_figure(self, training, figure, shrinking_option, step=1):
         new_figure = figure
