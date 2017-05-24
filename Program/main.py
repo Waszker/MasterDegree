@@ -158,7 +158,7 @@ if __name__ == "__main__":
             ellipsoids = ShrinkingFigures(digits, letters, minimum_volume_figure_class=HyperRectangle)
             shrinking_option = ShrinkingFigures.ShrinkingOption.TOLERANCE_MANIPULATION if o == "-7" \
                 else ShrinkingFigures.ShrinkingOption.ELEMENTS_REJECTION
-            results = np.asarray(ellipsoids.perform_tests(steps=2, shrinking_option=shrinking_option), dtype=float)
+            results = np.asarray(ellipsoids.perform_tests(steps=100, shrinking_option=shrinking_option), dtype=float)
             filename = "../Results/%s_shrinking_rectangles.csv" % o[1]
             np.savetxt(filename, results, delimiter=',', fmt='%f')
 
