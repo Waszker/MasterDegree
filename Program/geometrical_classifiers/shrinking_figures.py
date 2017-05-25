@@ -35,14 +35,17 @@ class ShrinkingFigures(NativeFigures):
         original_figures = self.figures
         results = []
         training = self.dataset.get_patterns_by_class()[0]
-
+        filename = "../Results/%s_shrinking_ellipsoids.csv" % "rejection"
         for step in xrange(1, steps + 1):
+            print "Performed step %i of %i" % (step, steps)
             matrix = self.get_confusion_matrix(self.foreign_elements, self.figure_tolerance)
             results.append(self._get_ratios_from_matrix(matrix))
             self.figures = [self._shrink_figure(training[i], figure, shrinking_option, step=step)
                             for i, figure in enumerate(self.figures)]
             if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
                 self.figure_tolerance -= 0.02
+            with open(filename, 'a') as f:
+                f.write("%f, %f, %f\n" % tuple(results[-1]))
 
         self.figure_tolerance = original_figure_tolerance
         self.figures = original_figures
