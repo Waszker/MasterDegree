@@ -1,5 +1,4 @@
-\lhead{\emph{Classifier Arrays}}
-\chapter{Classifier Arrays}
+\section{Classifier Arrays}
 
 Another approach towards classification with rejection option problem involves chaining classifiers trained on certain, very specific data. The array of those classifiers serves as a voting mechanism where every new and unknown pattern is presented to each classifier in this array and the classification (or rejection) decision is made based on the overall achieved score. All classifiers inside the array are binary ones but can be divided into two groups:
 \begin{itemize}
@@ -7,7 +6,7 @@ Another approach towards classification with rejection option problem involves c
 	\item one-versus-one - every classifier is trained on training patterns from two different classes
 \end{itemize}
 
-\section{One-versus-all}
+\subsection{One-versus-all}
 
 \begin{figure}[htp]
 	\centering
@@ -16,15 +15,15 @@ Another approach towards classification with rejection option problem involves c
 	\label{fig:rejection_version1}\vspace{-3pt}
 \end{figure}
 
-\subsection{Description}
+\subsubsection{Description}
 
 The ``one-versus-all'' method requires creating an array of binary classifiers. Training data set for each classifier in this method consists of two sets: the first one (denoted as ``class\_i'') holding all training data for certain i-th native class, and the second one (denoted as ``rest'') being the result of a~subset sum operation performed on the rest of the classes except for the class used in class\_i set. One problem with such approach is that as a~result of the subset sum, class ``rest'' could contain significantly more samples than ``class\_i''. In such case the ``rest`` set is udersampled. 
 
-\subsection{Implementation details}
+\subsubsection{Implementation details}
 
 The actual classification with rejection is performed by presenting the unknown pattern to each of the classifiers from the array. When any classifier recognizes this element as a~native one (belonging to class\_i), then the pattern is treated as a~recognized one, and it is assumed to be native. In a~case when all classifiers reject a~pattern (all binary classifiers say that it belongs to set ``rest''), it is treated as a~foreign pattern and it is rejected. It is worth noticing that there is a~possibility that more than one classifier recognizes the pattern as a~native element. In such case randomly chosen class label is assigned to this pattern. The scheme for this method is sketched in Figure~\ref{fig:rejection_version1}. 
 
-\section{One-versus-one}
+\subsection{One-versus-one}
 \label{one-versus-all}
 
 \begin{figure}[htp]
@@ -34,66 +33,18 @@ The actual classification with rejection is performed by presenting the unknown 
 	\label{fig:rejection_version2}\vspace{-3pt}
 \end{figure}
 
-\subsection{Description}
+\subsubsection{Description}
 
 The ``one-versus-one'' method requires preparing an array of classifiers, but this time it consists of ${c}\choose{2}$ classifiers, where $c$ is the number of native classes. Each classifier is trained on data consisting of two sets: the first one (denoted as class\_i) holding all training data entries for i-th native class, and the second one (denoted as class\_o) holding all training data entries for some other class (not the same as class\_i). In the end, there is one classifier for each pair of classes: $1$ vs. $2$, $1$ vs. $3$, \dots, $1$ vs. $c$, \dots, $(c-1)$ vs. $c$. 
 
-\subsection{Implementation details}
+\subsubsection{Implementation details}
 
 Classification with rejection mechanism is based on presenting unknown pattern to each classifier in the vector and remembering their answers (e.g.~classifier constructed for $1$ vs. $c$ classes can classify the pattern as belonging to class $1$ or class $c$). In the end, those answers can be summarized and for each pattern a~$c$-elements array with numbers saying how many times this pattern was classified as belonging to class $1, 2, 3, \ldots, c$ can be formed. The pattern is rejected when the difference between two biggest values in the result array is smaller than two. In such case, it is assumed that the classifiers were highly uncertain as to which class should this unknown element belong to. Otherwise, the pattern is classified as an element belonging to the class which had the biggest value in the result array. The general scheme for this method is presented in Figure~\ref{fig:rejection_version2}. 
 
-\section{One-versus-one modified}
+\subsection{One-versus-one modified}
 
 The modified ``one-versus-one'' method is based on the``one-versus-one'' method discussed in \ref{one-versus-all}. The difference between those two methods lies in a~rejection mechanism. In this method an unknown pattern is treated as a~foreign element if the biggest value in the result array is smaller than $(c-1)$. What it actually means, is that there must be a~certain class that has always been chosen by a~classifier whenever it was possible.
 
-\section{Results}
+\subsection{Summary}
 
-All the results presented in Tables \ref{classifier_hierarchy_training_results} and \ref{classifier_hierarchy_test_results} were obtained for kNN using n\_neighbors parameter with value 10, SVM using rbf kernel, having C value of 8 and gamma 0.5 and random forest consisting of 100 estimators.
-
-\begin{table}[htp]
-	\centering
-	\caption{Measures values (described in Chapter \ref{quality_measures}) for classifier hierarchy arrays using various common classifiers on training data (described in Chapter \ref{datasets})}
-	\label{classifier_hierarchy_training_results}
-	\resizebox{\textwidth}{!}{
-	\begin{tabular}{l|c|c|c|c|c|c|c|c|c|}
-		\cline{2-10}
-		\textbf{}                                                & \multicolumn{3}{c|}{\textbf{1 vs. all}}                                                                  & \multicolumn{3}{c|}{\textbf{1 vs. 1}}                                                                    & \multicolumn{3}{c|}{\textbf{1 vs. 1 (2)}}                                                                \\ \cline{2-10} 
-		\textbf{}                                                & \multicolumn{1}{l|}{\textbf{kNN}} & \multicolumn{1}{l|}{\textbf{SVM}} & \multicolumn{1}{l|}{\textbf{RF}} & \multicolumn{1}{l|}{\textbf{kNN}} & \multicolumn{1}{l|}{\textbf{SVM}} & \multicolumn{1}{l|}{\textbf{RF}} & \multicolumn{1}{l|}{\textbf{kNN}} & \multicolumn{1}{l|}{\textbf{SVM}} & \multicolumn{1}{l|}{\textbf{RF}} \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Strict Accuracy}}           & 17.07                             & 23.38                             & 26.94                            & 79.04                             & 66.03                             & 69.84                            & 19.90                             & 34.79                             & 33.01                            \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Fine Accuracy}}             & 81.32                             & 91.23                             & 91.34                            & -                                 & 99.70                             & 100.00                           & 94.94                             & 98.50                             & 100.00                           \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Strict Native Sensitivity}} & 81.32                             & 91.17                             & 91.34                            & 0.00                              & 9.58                              & 9.33                             & 94.94                             & 98.46                             & 100.00                           \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Accuracy}}                  & 20.99                             & 25.22                             & 28.75                            & 79.04                             & 66.04                             & 69.84                            & 20.96                             & 35.10                             & 33.01                            \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Native Precision}}          & 20.97                             & 21.88                             & 22.73                            & -                                 & 11.82                             & 14.92                            & 20.96                             & 24.41                             & 23.83                            \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Native Sensitivity}}        & 100.00                            & 99.93                             & 100.00                           & 0.00                              & 9.61                              & 9.33                             & 100.00                            & 99.96                             & 100.00                           \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 34.66                             & 35.90                             & 37.04                            & -                                 & 10.60                             & 11.48                            & 34.66                             & 39.23                             & 38.49                            \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Foreign Precision}}         & 100.00                            & 99.65                             & 100.00                           & 79.04                             & 77.16                             & 78.13                            & -                                 & 99.94                             & 100.00                           \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Foreign Sensitivity}}       & 0.04                              & 5.41                              & 9.86                             & 100.00                            & 81.00                             & 85.88                            & 0.00                              & 17.90                             & 15.25                            \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 0.08                              & 10.26                             & 17.95                            & 88.29                             & 79.04                             & 81.82                            & -                                 & 30.36                             & 26.46                            \\ \hline
-	\end{tabular}
-}
-\end{table}
-
-\begin{table}[htp]
-	\centering
-	\caption{Measures values (described in Chapter \ref{quality_measures}) for classifier hierarchy arrays using various common classifiers on test data (described in Chapter \ref{datasets})}
-	\label{classifier_hierarchy_test_results}
-	\resizebox{\textwidth}{!}{
-\begin{tabular}{l|c|c|c|c|c|c|c|c|c|}
-	\cline{2-10}
-	\textbf{}                                                & \multicolumn{3}{c|}{\textbf{1 vs. all}}                                                                  & \multicolumn{3}{c|}{\textbf{1 vs. 1}}                                                                    & \multicolumn{3}{c|}{\textbf{1 vs. 1 (2)}}                                                                \\ \cline{2-10} 
-	\textbf{}                                                & \multicolumn{1}{l|}{\textbf{kNN}} & \multicolumn{1}{l|}{\textbf{SVM}} & \multicolumn{1}{l|}{\textbf{RF}} & \multicolumn{1}{l|}{\textbf{kNN}} & \multicolumn{1}{l|}{\textbf{SVM}} & \multicolumn{1}{l|}{\textbf{RF}} & \multicolumn{1}{l|}{\textbf{kNN}} & \multicolumn{1}{l|}{\textbf{SVM}} & \multicolumn{1}{l|}{\textbf{RF}} \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Strict Accuracy}}           & 8.28                              & 14.09                             & 17.88                            & 89.78                             & 73.72                             & 78.11                            & 9.47                              & 25.93                             & 23.40                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Fine Accuracy}}             & 80.69                             & 90.92                             & 89.39                            & -                                 & 97.02                             & 96.39                            & 92.64                             & 96.92                             & 95.51                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Strict Native Sensitivity}} & 80.69                             & 90.31                             & 88.35                            & 0.00                              & 9.75                              & 9.79                             & 92.64                             & 96.44                             & 94.97                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Accuracy}}                  & 10.26                             & 15.01                             & 18.95                            & 89.78                             & 73.75                             & 78.14                            & 10.22                             & 26.24                             & 23.85                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Native Precision}}          & 10.23                             & 10.68                             & 11.10                            & -                                 & 5.68                              & 7.57                             & 10.22                             & 12.13                             & 11.78                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Native Sensitivity}}        & 100.00                            & 99.33                             & 98.83                            & 0.00                              & 10.05                             & 10.15                            & 100.00                            & 99.50                             & 99.43                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 18.55                             & 19.29                             & 19.96                            & -                                 & 7.26                              & 8.67                             & 18.55                             & 21.62                             & 21.07                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Foreign Precision}}         & 100.00                            & 98.62                             & 98.67                            & 89.78                             & 88.78                             & 89.36                            & -                                 & 99.68                             & 99.58                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Foreign Sensitivity}}       & 0.04                              & 5.41                              & 9.86                             & 100.00                            & 81.00                             & 85.88                            & 0.00                              & 17.90                             & 15.25                            \\ \hline
-	\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 0.08                              & 10.26                             & 17.93                            & 94.61                             & 84.71                             & 87.59                            & -                                 & 30.35                             & 26.45                            \\ \hline
-\end{tabular}
-}
-\end{table}
-
-The results obtained when using kNN classifier aren't very satisfying. All foreign elements were treated as a native ones which means that rejection option is not present in this approach. Both SVM and random forest performed better, but not as good as the classifier trees described in Chapter \ref{classifier_trees}. Whereas 1 vs. all approach lacked definitive rejection option, the 1 vs. 1 was too strict in rejecting presented patterns. Although the last method, denoted as modified 1 vs. 1 approach brought balance to classification-rejection problem it didn't manage to preserve high ratios for both options.
+The experiments performed on classifier trees and their results are described in details in Chapter \ref{experiments}. Classifier arrays behave differently based on what approach is used. Whereas one-versus-all technique scores high in classification, it lacks in rejection option greatly. On the contrary the one-versus-one algorithm tends to reject all patterns, even the native ones. The third method, which is modified one-versus-one approach, brings balance between classification and rejection rates. 
