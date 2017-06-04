@@ -63,7 +63,7 @@ It is worth noting though that in some cases, where the number of features is mu
 \begin{figure}[htp]
 	\centering
 	\includegraphics[width=1.0\textwidth]{Figures/rf_visualization_funny.jpg}
-	\caption{A funny example of a decision tree}
+	\caption{An example of small decision tree}
 	\label{fig:rf_visualization_funny}\vspace{-3pt}
 \end{figure}
 
@@ -115,7 +115,7 @@ where $c \in \mathbb{R}^{n}$ is the centre of the ellipse E and $ A $ is a posit
 \begin{equation}\label{eq:ellipsoid_affiliation}(x_{i} - c)^{T}A(x_{i} - c) \le 1 + \varepsilon\end{equation}
 where $\varepsilon$ parameter defines the error margin in determining whether certain point belongs to ellipsoid. It can also be used ``enlarge`` the ellipsoid (by increasing $\varepsilon$ value).% It can be imagined as testing point inclusion on enlarged ellipsoid.
 
-However, constructing minimal volume bounding ellipsoid is not a convex optimization problem. It turns out that the solution is not easily obtainable so the dual problem has to be found. For a more precise and in depth solution description see \cite{MVEEMichaelTodd2005}. The main problem, when using ellipsoids as identifiers, lies in constructing them. Two main factors that decide about identification effectiveness are tolerance and acceptance parameters. Tolerance can be viewed as a threshold for ellipsoid construction accuracy. The lower the parameter is, the better minimal volume ellipsoid is created. On the other hand, even with a good training set, there is a risk of including native patterns that lie outside of the created ellipsoid. Acceptance parameter has been introduced to prevent such unwanted behaviour. It defines a threshold for point rejection for elements lying outside of the created figure.
+However, constructing minimal volume bounding ellipsoid is not a convex optimization problem. It turns out that the solution is not easily obtainable so the dual problem has to be found. For a more precise and in depth solution description see \cite{MVEEMichaelTodd2005}. The main problem, when using ellipsoids as identifiers, lies in constructing them. Two main factors that decide about identification effectiveness are tolerance and acceptance parameters. Tolerance can be viewed as a threshold for ellipsoid construction accuracy (and the stop condition used in algorithm). The lower the parameter is, the better minimal volume ellipsoid is created. On the other hand, even with a good training set, there is a risk of including native patterns that lie outside of the created ellipsoid. Acceptance parameter has been introduced to prevent such unwanted behaviour. It defines a threshold for point rejection for elements lying outside of the created figure.
 
 \subsection{Minimum Volume Enclosing Hyper Rectangle}
 
@@ -126,4 +126,4 @@ However, constructing minimal volume bounding ellipsoid is not a convex optimiza
 	\label{fig:minimum_bounding_box_visualization}\vspace{-3pt}
 \end{figure}
 
-Out of all possible minimum volume figures, the hyper rectangle, also called smallest enclosing box, is probably the easiest and most intuitive solution. To create such hyper rectangle one needs to store biggest and smallest value for each dimension from the training data set. Although it is straightforward to find the smallest enclosing box that has sides parallel to the coordinate axes, the difficult part of the problem is to determine the orientation of the box. In this paper only hyper rectangles with their sides parallel to the axes are considered. The inclusion test performed for each point is done by checking if each of the point's coordinates lies within bounds of enclosing box.
+Out of all possible minimum volume figures, the hyper rectangle, also called smallest enclosing box, is probably the easiest and most intuitive solution. To create such hyper rectangle one needs to store biggest and smallest values for each dimension from the training data set. Although it is straightforward to find the smallest enclosing box that has sides parallel to the coordinate axes, the difficult part of the problem is to determine the orientation of the box in the feature space. In this paper only hyper rectangles with their sides parallel to the axes are considered. The inclusion test performed for each point is done by checking if each of the point's coordinates lies within bounds of enclosing box.
