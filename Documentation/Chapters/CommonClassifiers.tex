@@ -95,6 +95,13 @@ Each class' cloud can be enclosed in an arbitrary geometrical shape which can be
 
 \subsection{Minimum Volume Enclosing Ellipsoid}
 
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.70\textwidth]{Figures/minimum_bounding_ellipsoid.png}
+	\caption{An example of minimum volume enclosing ellipsoid for points in 3D space}
+	\label{fig:minimum_bounding_ellipsoid_visualization}\vspace{-3pt}
+\end{figure}
+
 Minimum Volume Enclosing Ellipsoid (denoted as MVEE) problem is solved by several known algorithms that can be categorized as first-order, second-order interior-point or combination of the two. For small dimensions \textit{d}, the MVEE problem can be solved in \textit{O($d^{O(d)}$m)} operations using randomized or deterministic algorithms~\cite{MVEEMichaelTodd2005}. All the results presented in this chapter were obtained while using MVEE algorithm based on Khachiyan solution.
 
 An ellipsoid in its centre form is given by the formula:
@@ -109,3 +116,14 @@ where $c \in \mathbb{R}^{n}$ is the centre of the ellipse E and $ A $ is a posit
 where $\varepsilon$ parameter defines the error margin in determining whether certain point belongs to ellipsoid. It can also be used ``enlarge`` the ellipsoid (by increasing $\varepsilon$ value).% It can be imagined as testing point inclusion on enlarged ellipsoid.
 
 However, constructing minimal volume bounding ellipsoid is not a convex optimization problem. It turns out that the solution is not easily obtainable so the dual problem has to be found. For a more precise and in depth solution description see \cite{MVEEMichaelTodd2005}. The main problem, when using ellipsoids as identifiers, lies in constructing them. Two main factors that decide about identification effectiveness are tolerance and acceptance parameters. Tolerance can be viewed as a threshold for ellipsoid construction accuracy. The lower the parameter is, the better minimal volume ellipsoid is created. On the other hand, even with a good training set, there is a risk of including native patterns that lie outside of the created ellipsoid. Acceptance parameter has been introduced to prevent such unwanted behaviour. It defines a threshold for point rejection for elements lying outside of the created figure.
+
+\subsection{Minimum Volume Enclosing Hyper Rectangle}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.40\textwidth]{Figures/minimum_bounding_box.png}
+	\caption{An example of minimum bounding box for points in 3D space}
+	\label{fig:minimum_bounding_box_visualization}\vspace{-3pt}
+\end{figure}
+
+Out of all possible minimum volume figures, the hyper rectangle, also called smallest enclosing box, is probably the easiest and most intuitive solution. To create such hyper rectangle one needs to store biggest and smallest value for each dimension from the training data set. Although it is straightforward to find the smallest enclosing box that has sides parallel to the coordinate axes, the difficult part of the problem is to determine the orientation of the box. In this paper only hyper rectangles with their sides parallel to the axes are considered. The inclusion test performed for each point is done by checking if each of the point's coordinates lies within bounds of enclosing box.

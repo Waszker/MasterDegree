@@ -36,18 +36,33 @@ Random forests also had modifications applied to one parameter \[ n\_estimators:
 This paper contains some new approaches towards classification with rejection problem. In order to evaluate proposed solutions some quality measures must be introduced. Dealing with both native and foreign patterns forces inclusion of those measures that compare quality of both classification and rejection. Those values used in this paper are described below and in Table~\ref{tab:measures}.
 
 \begin{itemize}
-	\item \emph{Correctly Classified} is the number of native patterns classified as native with a~correct class label.
-	\item \emph{True Positives} is the number of native patterns classified as native (no matter, into which native class).
-	\item \emph{False Negatives} is the number of native patterns incorrectly classified as foreign.
-	\item \emph{False Positives} is the number of foreign patterns incorrectly classified as native.
-	\item \emph{True Negatives} is the number of foreign patterns correctly classified as foreign.
-\end{itemize}  
+	\item \emph{CC (Correctly Classified)} is the number of native patterns classified as native with a~correct class label.
+	\item \emph{TP (True Positives)} is the number of native patterns classified as native (no matter, into which native class).
+	\item \emph{FN (False Negatives)} is the number of native patterns incorrectly classified as foreign.
+	\item \emph{FP (False Positives)} is the number of foreign patterns incorrectly classified as native.
+	\item \emph{TN (True Negatives)} is the number of foreign patterns correctly classified as foreign.
+\end{itemize}
 
+Based on these notions the following measures for model quality evaluation can be employed:
+
+\begin{itemize}
+	\item \emph{Strict Accuracy} is the absolute measure of the classifier's performance. It is the ratio of the number of all correctly classified patterns to their respective classes and rejected foreign ones to the number of all processed patterns.
+	\item \emph{Accuracy} is a characteristic derived from Strict Accuracy by ignoring the need to classify native patterns to their respective classes.
+	\item \emph{Native Precision} is the ratio of the number of not rejected native patterns to the number of all not rejected patterns,
+	\item \emph{Native Sensitivity} is the ratio of the number of not rejected native patterns to all native ones. This measure evaluates the ability of the classifier to identify native elements. The higher the value of Native Sensitivity, the more effective identification of native elements. Unlike the Native Precision, this measure does not evaluate the effectiveness of separation between native and foreign elements.
+	\item \emph{Strict Sensitivity} takes only correctly classified native patterns and does not consider native patterns which are not rejected and assigned to incorrect classes.
+	\item \emph{Fine Sensitivity} is the ratio of the number of native patterns classified to correct classes to the number of all native patterns not rejected.
+	\item \emph{Foreign Precision} corresponds to Native Precision
+	\item \emph{Foreign Sensitivity} corresponds to Native Sensitivity
+	\item \emph{Foreign F-measure} is there to express the balance between precision and sensitivity since these two measures affect each other. Increasing sensitivity can cause a drop in precision since, along with correctly classified elements, there might be more incorrectly classified,
+\end{itemize}
+
+The equations for each measure can be seen in Table \ref{tab:measures}.
 
 \begin{table}[!h]
 	\centering
 	\caption{Quality measures for classification with rejection.}
-	\vspace{6pt}
+	\vspace{6pt}	
 	{\footnotesize
 		\begin{tabular}{rclrcl}
 			$\textnormal{Native Precision}$ &$=$& $\displaystyle\frac{\textnormal{TP}}{\textnormal{TP+FP}}$ & 
@@ -84,11 +99,11 @@ The native set consists of 10,000 scanned digit images, with ten different class
 
 \section{Classifier trees}
 
-Described in Chapter \ref{classifier_trees} classifier trees were tested with various common classifiers: SVM, kNN and random forest, using different parameters. Over 500 tests were held. When evaluating results quality evaluation measurements were taken into account (see Chapter \ref{quality_measures}). In the next few subsections there is short summary for each classifier tree using different internal classifiers. Because the results obtained for Slanting Tree with ordered classes were almost exactly the same as for regular Slanting Tree (with arbitrary class order) the results tables do not include scores achieved for the original Slanting Tree (without computed order of classes) to maintain their clarity.
+Described in Chapter \ref{classifier_trees} classifier trees were tested with various common classifiers: SVM, kNN and random forest, using different parameters. Over 500 tests were held. When evaluating results quality evaluation measurements were taken into account (see Section \ref{quality_measures}). In the next few subsections there is short summary for each classifier tree using different internal classifiers. Because the results obtained for Slanting Tree with ordered classes were almost exactly the same as for regular Slanting Tree (with arbitrary class order) the results tables do not include scores achieved for the original Slanting Tree (without computed order of classes) to maintain their clarity.
 
 \begin{table}[htp]
 	\centering
-	\caption{Measures values (described in Chapter \ref{quality_measures}) for classifier trees using various common classifiers on training data (described in Chapter \ref{datasets})}
+	\caption{Measures values (described in Section \ref{quality_measures}) for classifier trees using various common classifiers on training data (described in Section \ref{datasets})}
 	\label{classifier_trees_training_results}
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{l|l|l|l|l|l|l|l|l|l|}
@@ -111,7 +126,7 @@ Described in Chapter \ref{classifier_trees} classifier trees were tested with va
 
 \begin{table}[htp]
 	\centering
-	\caption{Measures values (described in Chapter \ref{quality_measures}) for classifier trees using various common classifiers on test data (described in Chapter \ref{datasets})}
+	\caption{Measures values (described in Section \ref{quality_measures}) for classifier trees using various common classifiers on test data (described in Section \ref{datasets})}
 	\label{classifier_trees_test_results}
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{l|l|l|l|l|l|l|l|l|l|}
@@ -146,7 +161,7 @@ All the results presented in Tables \ref{classifier_hierarchy_training_results} 
 
 \begin{table}[htp]
 	\centering
-	\caption{Measures values (described in Chapter \ref{quality_measures}) for classifier hierarchy arrays using various common classifiers on training data (described in Chapter \ref{datasets})}
+	\caption{Measures values (described in Section \ref{quality_measures}) for classifier hierarchy arrays using various common classifiers on training data (described in Section \ref{datasets})}
 	\label{classifier_hierarchy_training_results}
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{l|c|c|c|c|c|c|c|c|c|}
@@ -169,7 +184,7 @@ All the results presented in Tables \ref{classifier_hierarchy_training_results} 
 
 \begin{table}[htp]
 	\centering
-	\caption{Measures values (described in Chapter \ref{quality_measures}) for classifier hierarchy arrays using various common classifiers on test data (described in Chapter \ref{datasets})}
+	\caption{Measures values (described in Section \ref{quality_measures}) for classifier hierarchy arrays using various common classifiers on test data (described in Section \ref{datasets})}
 	\label{classifier_hierarchy_test_results}
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{l|c|c|c|c|c|c|c|c|c|}
@@ -190,30 +205,50 @@ All the results presented in Tables \ref{classifier_hierarchy_training_results} 
 	}
 \end{table}
 
-The results obtained when using kNN classifier aren't very satisfying. All foreign elements were treated as a native ones which means that rejection option is not present in this approach. Both SVM and random forest performed better, but not as good as the classifier trees described in Chapter \ref{classifier_trees}. Whereas 1 vs. all approach lacked definitive rejection option, the 1 vs. 1 was too strict in rejecting presented patterns. Although the last method, denoted as modified 1 vs. 1 approach brought balance to classification-rejection problem it didn't manage to preserve high ratios for both options.
+The results obtained when using kNN classifier aren't very satisfying. All foreign elements were treated as a native ones which means that rejection option is not present in this approach. Both SVM and random forest performed better, but not as good as the classifier trees described in Section \ref{classifier_trees}. Whereas 1 vs. all approach lacked definitive rejection option, the 1 vs. 1 was too strict in rejecting presented patterns. Although the last method, denoted as modified 1 vs. 1 approach brought balance to classification-rejection problem it didn't manage to preserve high ratios for both options.
 
 \section{Geometrical classifiers}
 
-The tests for geometrical classifiers, ellipsoids and hyper-rectangle, were performed using minimum volume figures without any size alterations (see Section \ref{size_optimizing} for reference). The results can be seen in Table \ref{ellipsoid_arrays_results}
+The tests for geometrical classifiers, ellipsoids and hyper-rectangles, were performed using those minimum volume figures without any size alterations (see Section \ref{size_optimizing} for reference). The results can be seen in Table \ref{ellipsoid_arrays_results_training} and Table \ref{ellipsoid_arrays_results_test}.
 
 \begin{table}[htp]
 	\centering
-	\caption{Results obtained for Ellipsoid arrays}
-	\label{ellipsoid_arrays_results}
-	\begin{tabular}{l|c|lll}
-		\cline{2-2}
-		& \multicolumn{1}{l|}{\textbf{Ellipsoid}} &  &  &  \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Strict Accuracy}}           & 88.28 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Fine Accuracy}}             & 93.14 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Strict Native Sensitivity}} & 83.95 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Accuracy}}                  & 89.98 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Native Precision}}          & 77.23 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Native Sensitivity}}        & 90.13 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 83.18 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Foreign Precision}}         & 96.01 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Foreign Sensitivity}}       & 89.93 \\ \cline{1-2}
-		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 92.87 \\ \cline{1-2}
+	\caption{Results obtained for geometrical classifiers arrays using ellipsoids and hyper rectangles, tested on training set.}
+	\label{ellipsoid_arrays_results_training}
+	\begin{tabular}{l|c|c|lll}
+		\cline{2-3}
+		& \multicolumn{1}{l|}{\textbf{Ellipsoid}} & \textbf{Hyper Rectangle}  &  &  \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Strict Accuracy}}           & 88.72 & 56.38 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Fine Accuracy}}             & 93.15 & 34.55 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Strict Native Sensitivity}} & 84.16 & 34.13 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Accuracy}}                  & 90.01 & 69.94 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Native Precision}}          & 70.41 & 41.00 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Native Sensitivity}}        & 90.34 & 98.79 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 79.14 & 57.95 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Foreign Precision}}         & 97.23 & 99.49 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Foreign Sensitivity}}       & 89.93 & 62.28 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 93.43 & 76.61 \\ \cline{1-3}
 	\end{tabular}
 \end{table}
 
-Although it may seem that the ellipsoids are superior to other classifiers presented and used in this paper it is worth noting that the tests were performed on only one dataset. Geometric classifiers that work on raw data, without introducing any changes to feature values given during training don't work well in situations when class elements overlap. SVM, random forest, etc. which should be used in such cases have the advantage over simple classifiers like kNN or arrays of minimum volume enclosing figures, because they change the way features are interpreted. For example, SVM increases dimensionality by using kernel function to introduce such feature-space representation in which two different classes are easily separated by a hyperplane.
+\begin{table}[htp]
+	\centering
+	\caption{Results obtained for geometrical classifiers arrays using ellipsoids and hyper rectangles, tested on test set.}
+	\label{ellipsoid_arrays_results_test}
+	\begin{tabular}{l|c|c|lll}
+		\cline{2-3}
+		& \multicolumn{1}{l|}{\textbf{Ellipsoid}} & \textbf{Hyper Rectangle} &  &  &  \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Strict Accuracy}}           & 89.27 & 59.32 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Fine Accuracy}}             & 93.12 & 34.00 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Strict Native Sensitivity}} & 83.47 & 33.23 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Accuracy}}                  & 89.90 & 65.90 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Native Precision}}          & 50.29 & 22.76 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Native Sensitivity}}        & 89.90 & 97.73 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Native F-measure}}          & 64.43 & 36.92 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Foreign Precision}}         & 98.71 & 99.59 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Foreign Sensitivity}}       & 89.93 & 62.28 \\ \cline{1-3}
+		\multicolumn{1}{|l|}{\textbf{Foreign F-measure}}         & 94.11 & 76.64 \\ \cline{1-3}
+	\end{tabular}
+\end{table}
+
+Although it may seem that the ellipsoids are superior to other classifiers presented and used in this paper it is worth noting that the tests were performed on only one dataset. Geometric classifiers that work on raw data, without introducing any changes to feature values given during training don't work well in situations when class elements overlap. SVM, random forest, etc. which should be used in such cases have the advantage over simple classifiers like kNN or arrays of minimum volume enclosing figures, because they change the way features are interpreted. For example, SVM increases dimensionality by using kernel function to introduce such feature-space representation in which two different classes are easily separated by a hyperplane. As for hyper rectangles, they don't perform as good as ellipsoids but have one very important advantage over them - speed of computation. Hyper rectangles are the fastest solution out of all methods mentioned and described in this paper. What is more, after some tinkering with their size, one can achieve very reasonable classification and rejection capabilities (see Section \ref{size_optimizing} for reference). For sure minimum volume enclosing ellipsoids are worth using in situations where data is easily separable.
