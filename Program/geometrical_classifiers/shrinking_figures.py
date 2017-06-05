@@ -35,17 +35,21 @@ class ShrinkingFigures(NativeFigures):
         original_figures = self.figures
         results = []
         training = self.dataset.get_patterns_by_class()[0]
-        filename = "../Results/%s_shrinking_ellipsoids.csv" % "rejection"
+        filename = "../Results/%s_shrinking_%s.csv" % (
+            str(shrinking_option), "ellipsoids" if isinstance(self.figures[0], MVEE) else "rectangles")
         for step in xrange(1, steps + 1):
-            print "Performed step %i of %i" % (step, steps)
-            matrix = self.get_confusion_matrix(self.foreign_elements, self.figure_tolerance)
-            results.append(self._get_ratios_from_matrix(matrix))
-            self.figures = [self._shrink_figure(training[i], figure, shrinking_option, step=step)
-                            for i, figure in enumerate(self.figures)]
-            if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
-                self.figure_tolerance -= 0.02
-            with open(filename, 'a') as f:
-                f.write("%f, %f, %f\n" % tuple(results[-1]))
+            try:
+                print "Performing step %i of %i" % (step, steps)
+                matrix = self.get_confusion_matrix(self.foreign_elements, self.figure_tolerance)
+                results.append(self._get_ratios_from_matrix(matrix))
+                self.figures = [self._shrink_figure(training[i], figure, shrinking_option, step=step)
+                                for i, figure in enumerate(self.figures)]
+                if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
+                    self.figure_tolerance -= 0.02
+                with open(filename, 'a') as f:
+                    f.write("%f, %f, %f, %f, %f, %f\n" % tuple(results[-1]))
+            except Exception:
+                pass
 
         self.figure_tolerance = original_figure_tolerance
         self.figures = original_figures
@@ -64,17 +68,23 @@ class ShrinkingFigures(NativeFigures):
 
     def _get_ratios_from_matrix(self, confusion_matrix):
         matrix = confusion_matrix
-        correctly_classified = sum([matrix[i][i] for i in xrange(len(matrix) - 1)])
-        correctly_native = sum([matrix[i][j] for i in xrange(len(matrix) - 1) for j in xrange(len(matrix[i]) - 1)])
+        first_test_row = (len(matrix) - 1) / 2
+        correctly_classified_training = sum([matrix[i][i] for i in xrange(first_test_row)])
+        correctly_classified_test = sum([matrix[first_test_row + i][i] for i in xrange(first_test_row)])
+        correctly_native_training = sum([matrix[i][j] for i in xrange(first_test_row) for j in xrange(len(matrix[i]) - 1)])
+        correctly_native_test = sum([matrix[first_test_row + i][j] for i in xrange(first_test_row) for j in xrange(len(matrix[i]) - 1)])
         correctly_rejected = matrix[-1][-1]
-        all_native = len(self.dataset.training_data) + len(self.dataset.test_data)
+        all_native_training = len(self.dataset.training_data)
+        all_native_test = len(self.dataset.test_data)
         all_foreign = len(self.foreign_elements)
 
-        classification = float(correctly_classified) / all_native
-        identification = float(correctly_native) / all_native
+        classification_training = float(correctly_classified_training) / all_native_training
+        classification_test = float(correctly_classified_test) / all_native_test
+        identification_training = float(correctly_native_training) / all_native_training
+        identification_test = float(correctly_native_test) / all_native_test
         rejection = float(correctly_rejected) / all_foreign
 
-        return classification, identification, rejection
+        return classification_training, identification_training, rejection, classification_test, identification_test, rejection
 
     def _shrink_figure(self, training, figure, shrinking_option, step=1):
         new_figure = figure
@@ -82,9 +92,10 @@ class ShrinkingFigures(NativeFigures):
             pass
         elif shrinking_option is self.ShrinkingOption.ELEMENTS_REJECTION:
             elements_removed = 5
-            distances = [figure.calculate_distance(pattern) for pattern in training]
+            distances = [figure.calculate_distances(pattern) for pattern in training]
             too_big_distance = sorted(distances)[-1 * (elements_removed * step)]
-            new_figure = MVEE([pattern for i, pattern in enumerate(training) if distances[i] < too_big_distance])
+            fig_cls = self.figure_class
+            new_figure = fig_cls([pattern for i, pattern in enumerate(training) if distances[i] < too_big_distance])
         else:
             raise TypeError("Unsupported shrinking_option value")
 

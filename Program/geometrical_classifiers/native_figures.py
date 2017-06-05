@@ -14,7 +14,8 @@ class NativeFigures:
         :param dataset: instance of Dataset class with training and test sets
         """
         self.dataset = dataset
-        self.figures = self._create_figures_for_classes(minimum_volume_figure_class)
+        self.figure_class = minimum_volume_figure_class
+        self.figures = self._create_figures_for_classes()
 
     def get_results(self, foreign_elements=None):
         """
@@ -47,12 +48,16 @@ class NativeFigures:
             result_array[best_figure if (minimum_distance <= (1. + tol)) else -1] += 1
 
         confusion_matrix = []
+        confusion_matrix2 = []
         training, test = self.dataset.get_patterns_by_class()
         for native_class in training.keys():
             native_results = [0] * (len(training.keys()) + 1)
+            native_results2 = [0] * (len(test.keys()) + 1)
             [classify_element(element, native_results, tolerance) for element in training[native_class]]
-            [classify_element(element, native_results, tolerance) for element in test[native_class]]
+            [classify_element(element, native_results2, tolerance) for element in test[native_class]]
             confusion_matrix.append(native_results)
+            confusion_matrix2.append(native_results2)
+        confusion_matrix.extend(confusion_matrix2)
         if foreign_elements is not None:
             foreign_results = [0] * (len(training.keys()) + 1)
             [classify_element(element, foreign_results, tolerance) for element in foreign_elements]
@@ -60,8 +65,8 @@ class NativeFigures:
 
         return np.asarray(confusion_matrix, dtype=float)
 
-    def _create_figures_for_classes(self, minimum_volume_figure_class):
+    def _create_figures_for_classes(self):
         patterns_by_class, _ = self.dataset.get_patterns_by_class()
-        figure_class = minimum_volume_figure_class
+        figure_class = self.figure_class
         figures = [figure_class(patterns_by_class[native_class]) for native_class in patterns_by_class.keys()]
         return figures

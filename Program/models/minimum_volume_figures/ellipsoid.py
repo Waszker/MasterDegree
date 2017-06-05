@@ -26,6 +26,9 @@ class Ellipsoid(MinimumVolumeFigure):
         point = np.asmatrix(point) - self.c
         return point * self.a * np.transpose(point)
 
+    def calculate_distances(self, point):
+        return self.calculate_distance(point)
+
     def _mvee(self, points, tolerance):
         # Taken from: http://stackoverflow.com/questions/14016898/port-matlab-bounding-ellipsoid-code-to-python
         points = np.asmatrix(points)

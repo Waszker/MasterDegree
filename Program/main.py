@@ -13,6 +13,7 @@ from classifier_tree.slanting_ordered_tree import SlantingOrderedTree
 from geometrical_classifiers.native_figures import NativeFigures
 from geometrical_classifiers.shrinking_figures import ShrinkingFigures
 from models.minimum_volume_figures.hyper_rectangle import HyperRectangle
+from models.minimum_volume_figures.ellipsoid import MVEE
 
 
 def get_result_matrix(tree, patterns, labels, matrix_size):
@@ -150,12 +151,12 @@ if __name__ == "__main__":
             filename = "../Results/native_ellipsoids.csv"
             np.savetxt(filename, results, delimiter=',', fmt='%f')
         elif o == "-6":
-            ellipsoids = NativeFigures(digits)
+            ellipsoids = NativeFigures(digits, minimum_volume_figure_class=MVEE)
             matrix = ellipsoids.get_confusion_matrix(letters, tolerance=0.001)
-            filename = "../Results/native_ellipsoids2.csv"
+            filename = "../Results/native_ellipsoid2.csv"
             np.savetxt(filename, matrix, delimiter=',', fmt='%i')
         elif o == "-7" or o == "-8":
-            ellipsoids = ShrinkingFigures(digits, letters)
+            ellipsoids = ShrinkingFigures(digits, letters, minimum_volume_figure_class=MVEE)
             shrinking_option = ShrinkingFigures.ShrinkingOption.TOLERANCE_MANIPULATION if o == "-7" \
                 else ShrinkingFigures.ShrinkingOption.ELEMENTS_REJECTION
             results = np.asarray(ellipsoids.perform_tests(steps=100, shrinking_option=shrinking_option), dtype=float)
