@@ -120,13 +120,13 @@ if __name__ == "__main__":
         sys.exit(0)
 
     reader = DatasetReader("../Datasets")
-    raw_data = reader.read_digits(filename='music_notes_native.csv', delimiter=';')
+    raw_data = reader.read_digits(filename='music_notes2_native.csv', delimiter=';')
     digits = Dataset(raw_data, division_ratio=0.70)
-    normalizer = Normalizer(digits.training_data)
-    digits.training_data = normalizer.get_normalized_data_matrix(digits.training_data)
-    digits.test_data = normalizer.get_normalized_data_matrix(digits.test_data)
-    letters = reader.read_letters(filename='music_notes_foreign.csv', delimiter=';')
-    letters = normalizer.get_normalized_data_matrix(letters)
+    # normalizer = Normalizer(digits.training_data)
+    # digits.training_data = normalizer.get_normalized_data_matrix(digits.training_data)
+    # digits.test_data = normalizer.get_normalized_data_matrix(digits.test_data)
+    letters = reader.read_letters(filename='music_notes2_foreign.csv', delimiter=';')
+    # letters = normalizer.get_normalized_data_matrix(letters)
 
     # @formatter:off
     def balanced_builder(x, y): return BalancedTree(classification_method=(x, y), clustering_method=("kmeans", None))
@@ -151,7 +151,6 @@ if __name__ == "__main__":
             filename = "../Results/native_ellipsoids.csv"
             np.savetxt(filename, results, delimiter=',', fmt='%f')
         elif o == "-6":
-            print digits.training_data.shape
             ellipsoids = NativeFigures(digits, minimum_volume_figure_class=MVEE)
             matrix = ellipsoids.get_confusion_matrix(letters, tolerance=0.001)
             filename = "../Results/native_ellipsoid2.csv"
