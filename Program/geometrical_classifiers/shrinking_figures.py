@@ -22,36 +22,34 @@ class ShrinkingFigures(NativeFigures):
         """
         NativeFigures.__init__(self, dataset, minimum_volume_figure_class)
         self.foreign_elements = foreign_elements
-        self.figure_tolerance = 1.
+        self.figure_tolerance = 0.001
 
-    def perform_tests(self, steps=10, shrinking_option=ShrinkingOption.TOLERANCE_MANIPULATION):
+    def perform_tests(self, steps=10, shrinking_option=ShrinkingOption.TOLERANCE_MANIPULATION, filename="partial.csv"):
         """
         Performs rejection and classification ratios tests on decreasing figure.
         :param steps: number of shrinking steps to make
         :param shrinking_option: ShrinkingOption enumerator defining shrinking algorithm
-        :return: list of tuples containing strict native and foreign accuracies
+        :param filename: name of the file to which partial results will be appended
         """
         original_figure_tolerance = self.figure_tolerance
+        if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION: self.figure_tolerance = 1.
         original_figures = self.figures
-        results = []
         training = self.dataset.get_patterns_by_class()[0]
-        filename = "../Results/%s_shrinking_%s.csv" % (
-            str(shrinking_option), "ellipsoids" if isinstance(self.figures[0], MVEE) else "rectangles")
+        filename = "../Results/%s" % filename
+
         for step in xrange(1, steps + 1):
             print "Performing step %i of %i" % (step, steps)
             matrix = self.get_confusion_matrix(self.foreign_elements, self.figure_tolerance)
-            results.append(self._get_ratios_from_matrix(matrix))
             self.figures = [self._shrink_figure(training[i], figure, shrinking_option, step=step)
                             for i, figure in enumerate(self.figures)]
             if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
                 self.figure_tolerance -= 0.02
             with open(filename, 'a') as f:
-                f.write("%f, %f, %f, %f, %f, %f\n" % tuple(results[-1]))
+                [f.write("%s\n" % ','.join(map(str, row))) for row in matrix]
+                f.write("\n")
 
         self.figure_tolerance = original_figure_tolerance
         self.figures = original_figures
-
-        return results
 
     def _get_ratios(self, native_class, native_elements, figure):
         tolerance = self.figure_tolerance

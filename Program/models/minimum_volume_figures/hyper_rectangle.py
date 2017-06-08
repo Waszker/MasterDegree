@@ -18,7 +18,7 @@ class HyperRectangle(MinimumVolumeFigure):
         :param point: vector of point coordinates in hyper rectangle n-space
         :return: float value denoting distance to hyper rectangle center (1.0 if point lies on hyper rectangle surface)
         """
-        distances = [1 if abs(coord - center) <= width else 100
+        distances = [(abs(coord - center) / width) if width > 0 else None
                      for coord, center, width in zip(point, self.centres, self.widths)]
         return max(distances)
 
@@ -28,9 +28,7 @@ class HyperRectangle(MinimumVolumeFigure):
         :param point: vector of point coordinates in hyper rectangle n-space
         :return: float value denoting distance to hyper rectangle center (1.0 if point lies on hyper rectangle surface)
         """
-        distances = [((coord - center) ** 2)
-                     for coord, center, width in zip(point, self.centres, self.widths)]
-        return sqrt(sum(distances))
+        return self.calculate_distance(point)
 
     def _calculate_bounds(self, points):
         self.left_bounds = np.amin(points, axis=0).tolist()

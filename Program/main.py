@@ -101,12 +101,20 @@ def _run_parallel_calculations2(tree_builder, digits_data, letters_data):
      for classifier1 in classifiers for classifier2 in classifiers]
 
 
+def _run_minimum_figure_calculations(figure_class, shrinking_option, datasets, datasets_name):
+    print "Running calculations for " + str(figure_class)
+    figures = ShrinkingFigures(*datasets, minimum_volume_figure_class=figure_class)
+    fname = "%s_shrinking_%s_%s" % (str(shrinking_option),
+                                    'rectangles' if figure_class is HyperRectangle else 'ellipsoids', datasets_name)
+    figures.perform_tests(steps=100, shrinking_option=shrinking_option, filename=fname)
+
+
 if __name__ == "__main__":
     """
     Main program entry function.
     """
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], "h12345678", [])
+        opts, _ = getopt.getopt(sys.argv[1:], "hi:n12345678", ["help", "input="])
         if len(opts) == 0: raise getopt.GetoptError("No options specified")
     except getopt.GetoptError as err:
         print str(err)
@@ -119,14 +127,26 @@ if __name__ == "__main__":
               "\n-8:ShrinkingEllipsoids (element rejection)"
         sys.exit(0)
 
+    turn_normalization_off = ('-n', '') in opts
+    data_file = "digits"
+
+    for o, a in opts:
+        if o in ('-i', '--input'):
+            data_file = a
+
+    print "Reading data from %s.csv" % data_file
     reader = DatasetReader("../Datasets")
-    raw_data = reader.read_digits(filename='music_notes2_native.csv', delimiter=';')
+    raw_data = reader.read_digits(filename="%s_native.csv" % data_file)
     digits = Dataset(raw_data, division_ratio=0.70)
-    # normalizer = Normalizer(digits.training_data)
-    # digits.training_data = normalizer.get_normalized_data_matrix(digits.training_data)
-    # digits.test_data = normalizer.get_normalized_data_matrix(digits.test_data)
-    letters = reader.read_letters(filename='music_notes2_foreign.csv', delimiter=';')
-    # letters = normalizer.get_normalized_data_matrix(letters)
+    letters = reader.read_letters(filename="%s_foreign.csv" % data_file)
+
+    if not turn_normalization_off:
+        print "Normalizing data before usage"
+        normalizer = Normalizer(digits.training_data)
+        digits.training_data = normalizer.get_normalized_data_matrix(digits.training_data)
+        digits.test_data = normalizer.get_normalized_data_matrix(digits.test_data)
+        letters = normalizer.get_normalized_data_matrix(letters)
+
 
     # @formatter:off
     def balanced_builder(x, y): return BalancedTree(classification_method=(x, y), clustering_method=("kmeans", None))
@@ -156,12 +176,12 @@ if __name__ == "__main__":
             filename = "../Results/native_ellipsoid2.csv"
             np.savetxt(filename, matrix, delimiter=',', fmt='%i')
         elif o == "-7" or o == "-8":
-            ellipsoids = ShrinkingFigures(digits, letters, minimum_volume_figure_class=MVEE)
-            shrinking_option = ShrinkingFigures.ShrinkingOption.TOLERANCE_MANIPULATION if o == "-7" \
-                else ShrinkingFigures.ShrinkingOption.ELEMENTS_REJECTION
-            results = np.asarray(ellipsoids.perform_tests(steps=100, shrinking_option=shrinking_option), dtype=float)
-            filename = "../Results/%s_shrinking_ellipsoids.csv" % o[1]
-            np.savetxt(filename, results, delimiter=',', fmt='%f')
+            figure_classes = [MVEE, HyperRectangle]
+            shrinking_options = [ShrinkingFigures.ShrinkingOption.TOLERANCE_MANIPULATION,
+                                 ShrinkingFigures.ShrinkingOption.ELEMENTS_REJECTION]
+            [pool.apply_async(_run_minimum_figure_calculations,
+                              args=(figure_class, shrinking_option, (digits, letters), data_file))
+             for figure_class in figure_classes for shrinking_option in shrinking_options]
 
     pool.close()
     pool.join()
