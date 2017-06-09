@@ -11,7 +11,7 @@ from classifier_tree.slanting_tree import SlantingTree
 from classifier_tree.slanting_dual_tree import SlantingDualTree
 from classifier_tree.slanting_ordered_tree import SlantingOrderedTree
 from geometrical_classifiers.native_figures import NativeFigures
-from geometrical_classifiers.shrinking_figures import ShrinkingFigures
+from geometrical_classifiers.shrinking_figures import ShrinkingFigures, ShrinkingOption
 from models.minimum_volume_figures.hyper_rectangle import HyperRectangle
 from models.minimum_volume_figures.ellipsoid import MVEE
 
@@ -177,8 +177,7 @@ if __name__ == "__main__":
             np.savetxt(filename, matrix, delimiter=',', fmt='%i')
         elif o == "-7" or o == "-8":
             figure_classes = [MVEE, HyperRectangle]
-            shrinking_options = [ShrinkingFigures.ShrinkingOption.TOLERANCE_MANIPULATION,
-                                 ShrinkingFigures.ShrinkingOption.ELEMENTS_REJECTION]
+            shrinking_options = [ShrinkingOption.TOLERANCE_MANIPULATION, ShrinkingOption.ELEMENTS_REJECTION]
             [pool.apply_async(_run_minimum_figure_calculations,
                               args=(figure_class, shrinking_option, (digits, letters), data_file))
              for figure_class in figure_classes for shrinking_option in shrinking_options]

@@ -5,15 +5,16 @@ from models.minimum_volume_figures.minimum_volume_figure import MinimumVolumeFig
 from models.minimum_volume_figures.ellipsoid import MVEE
 
 
+class ShrinkingOption(enum.Enum):
+    TOLERANCE_MANIPULATION = 1
+    ELEMENTS_REJECTION = 2
+
+
 class ShrinkingFigures(NativeFigures):
     """
     Minimum volume figure used in testing purposes that shrinks its size in order to increase
     rejection option rate by sacrificing classification one.
     """
-
-    class ShrinkingOption(enum.Enum):
-        TOLERANCE_MANIPULATION = 1
-        ELEMENTS_REJECTION = 2
 
     def __init__(self, dataset, foreign_elements, minimum_volume_figure_class=MVEE):
         """
@@ -32,7 +33,7 @@ class ShrinkingFigures(NativeFigures):
         :param filename: name of the file to which partial results will be appended
         """
         original_figure_tolerance = self.figure_tolerance
-        if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION: self.figure_tolerance = 1.
+        if shrinking_option is ShrinkingOption.TOLERANCE_MANIPULATION: self.figure_tolerance = 1.
         original_figures = self.figures
         training = self.dataset.get_patterns_by_class()[0]
         filename = "../Results/%s" % filename
@@ -42,7 +43,7 @@ class ShrinkingFigures(NativeFigures):
             matrix = self.get_confusion_matrix(self.foreign_elements, self.figure_tolerance)
             self.figures = [self._shrink_figure(training[i], figure, shrinking_option, step=step)
                             for i, figure in enumerate(self.figures)]
-            if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
+            if shrinking_option is ShrinkingOption.TOLERANCE_MANIPULATION:
                 self.figure_tolerance -= 0.02
             with open(filename, 'a') as f:
                 [f.write("%s\n" % ','.join(map(str, row))) for row in matrix]
@@ -85,9 +86,9 @@ class ShrinkingFigures(NativeFigures):
 
     def _shrink_figure(self, training, figure, shrinking_option, step=1):
         new_figure = figure
-        if shrinking_option is self.ShrinkingOption.TOLERANCE_MANIPULATION:
+        if shrinking_option is ShrinkingOption.TOLERANCE_MANIPULATION:
             pass
-        elif shrinking_option is self.ShrinkingOption.ELEMENTS_REJECTION:
+        elif shrinking_option is ShrinkingOption.ELEMENTS_REJECTION:
             elements_removed = 5
             sorted_patterns = sorted(training, key=figure.calculate_distances)
             new_figure = self.figure_class(sorted_patterns[:-1 * step * elements_removed])
