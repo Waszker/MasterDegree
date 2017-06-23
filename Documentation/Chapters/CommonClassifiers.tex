@@ -126,4 +126,17 @@ However, constructing minimal volume bounding ellipsoid is not a convex optimiza
 	\label{fig:minimum_bounding_box_visualization}\vspace{-3pt}
 \end{figure}
 
-Out of all possible minimum volume figures, the hyper rectangle, also called smallest enclosing box, is probably the easiest and most intuitive solution. To create such hyper rectangle one needs to store biggest and smallest values for each dimension from the training data set. Although it is straightforward to find the smallest enclosing box that has sides parallel to the coordinate axes, the difficult part of the problem is to determine the orientation of the box in the feature space. In this paper only hyper rectangles with their sides parallel to the axes are considered. The inclusion test performed for each point is done by checking if each of the point's coordinates lies within bounds of enclosing box.
+Out of all possible minimum volume figures, the hyper rectangle, also called smallest enclosing box, is probably the easiest and most intuitive solution. To create such hyper rectangle one needs to store biggest and smallest values for each dimension from the training data set. Although it is straightforward to find the smallest enclosing box that has sides parallel to the coordinate axes, the difficult part of the problem is to determine the orientation of the box in the feature space. In this paper only hyper rectangles with their sides parallel to the axes are considered. The inclusion test performed for each point is done by checking if each of the point's coordinates lies within bounds of enclosing box, and no information about the distance to the rectangle's centre is given. In case of situation when there's a need for such information the following solution, presented in form of a pseudo-code (Algorithm \ref{eq:rectangle_affiliation}) can be used.
+
+\begin{algorithm}
+	\label{eq:rectangle_affiliation}
+	\caption{Algorithm for calculating point distance to hyper-rectangle centre using maximum metrics}
+	\KwIn{hp - hyper-rectangle centre coordinates, p - point for which inclusion test is performed}
+	\KwOut{d - distance of the point p to the hyper-rectangle centre using maximum metrics}
+	d = -1 \\
+	\ForEach{coordinate in hp}{
+		dtmp = |p - coordinate| \\
+		\If{dtmp < d}{d = dtmp}
+	}
+	return d \\
+\end{algorithm}
