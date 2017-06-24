@@ -98,11 +98,11 @@ All quality measures described in Section \ref{quality_measures} obtained and pr
 \begin{figure}[htp]
 	\centering
 	\includegraphics[width=0.7\textwidth]{Figures/mnistletters.png}
-	\caption{Visualization of scanned letters from MNIST database.}
+	\caption{Visualization of scanned letters from \href{I would like to thank my lovely sister who helped me to create all those charts and images included in this paper. Without you it'd have taken me ages to complete everything!}{MNIST} database.}
 	\label{fig:mnist_letters}\vspace{-3pt}
 \end{figure}
 
-The native set consists of 10,000 scanned digit images, with ten different classes one for every digit (0 - 9) and approximately 1000 samples for each class. This set is further divided into training and test sets in 7:3 ratio. The foreign set consists of 26,000 images of scanned letters and is not divided internally because it is used only in rejection option evaluation. All patterns within those two sets have been size-normalized and centred in a fixed-size image. Every pattern within those two datasets consists of 24 unique features that were extracted to ensure best classification capabilities. Examples of features are: maximum/position of maximum values of projections, histograms of projections, transitions, offsets; raw moments, central moments, Euler numbers etc. 
+The native set consists of 10,000 scanned digit images, with ten different classes, one for every digit (0 - 9) and approximately 1000 samples for each class. This set is further divided into training and test sets in 7:3 ratio. The foreign set consists of 26,000 images of scanned letters and is not divided internally because it is used only in rejection option evaluation. All patterns within those two sets have been size-normalized and centred in a fixed-size image. Every pattern within those two datasets consists of 24 unique features that were extracted to ensure best classification capabilities. Examples of features are: maximum/position of maximum values of projections, histograms of projections, transitions, offsets; raw moments, central moments, Euler numbers etc. 
 
 \section{Classifier trees}
 
@@ -212,7 +212,7 @@ All the results presented in Tables \ref{classifier_hierarchy_training_results} 
 	}
 \end{table}
 
-The results obtained when using kNN classifier aren't very satisfying. All foreign elements were treated as a native ones which means that rejection option is not present in this approach. Both SVM and random forest performed better, but not as good as the classifier trees described in Section \ref{classifier_trees}. Whereas 1 vs. all approach lacked definitive rejection option, the 1 vs. 1 was too strict in rejecting presented patterns. Although the last method, denoted as modified 1 vs. 1 approach brought balance to classification-rejection problem it didn't manage to preserve high ratios for both options.
+The results obtained when using kNN classifier aren't very satisfying. All foreign elements were treated as native ones which means that rejection option is not present in this approach. Both SVM and random forest performed better, but not as good as the classifier trees described in Section \ref{classifier_trees}. Whereas 1 vs. all approach lacked definitive rejection option, the 1 vs. 1 was too strict in rejecting presented patterns. Although the last method, denoted as modified 1 vs. 1 approach brought balance to classification-rejection problem it didn't manage to preserve high classification and rejection rates for both options.
 
 \section{Geometrical classifiers}
 
@@ -259,3 +259,73 @@ The tests for geometrical classifiers, ellipsoids and hyper-rectangles, were per
 \end{table}
 
 Although it may seem that the ellipsoids are superior to other classifiers presented and used in this paper it is worth noting that the tests were performed on only one dataset. Geometric classifiers that work on raw data, without introducing any changes to feature values given during training don't work well in situations when class elements overlap. SVM, random forest, etc. which should be used in such cases have the advantage over simple classifiers like kNN or arrays of minimum volume enclosing figures, because they change the way features are interpreted. For example, SVM increases dimensionality by using kernel function to introduce such feature-space representation in which two different classes are easily separated by a hyperplane. As for hyper rectangles, they don't perform as good as ellipsoids but have one very important advantage over them - speed of computation. Hyper rectangles are the fastest solution out of all methods mentioned and described in this paper. What is more, after some tinkering with their size, one can achieve very reasonable classification and rejection capabilities (see Section \ref{size_optimizing} for reference). For sure minimum volume enclosing ellipsoids are worth using in situations where data is easily separable.
+
+\section{Additional tests} \ \label{additional_tests}
+
+In order to verify results regarding minimum volume figure size alterations, performed and described in Section \ref{geometrical_classifiers}, the tests for methods using native elements removal and $\varepsilon$ value modification were additionally done on two new datasets. Those sets consist of 20 native classes and 1 foreign class, and represent musical notes. Whereas the first one contains unmodified raw data, the second one was created by standardizing those values. Contrary to what was stated in Section \ref{size_optimizing} the charts obtained for those two new sets show that size alterations may actually be a viable choice. For example at first look at the charts shown in Figure \ref{fig:shrinking_music_notes} it may seem like the best efficiency of the ellipsoids is achieved for $\varepsilon$ equal to 0. For training data, when setting $\varepsilon$ value to 0 classification, rejection and identification accuracy rates are above 90\%. However after looking at chart plotted for test data it is clearly visible that when using $\varepsilon = 0$ the identification and rejection rates drop to around 80\%. In this example it would probably be wiser to use $\varepsilon = 0.50$ in order to get all three score rates to 90\% accuracy level. Of course the results differ greatly depending on the type of the figure and data sets used. It is thus advisable to manually perform tests before applying minimum volume figures solutions to real-world problems in order to maintain highest rates possible.
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingEllipsoidsToleranceTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingEllipsoidsToleranceTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for different $\varepsilon$ values, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Minimum volume enclosing figure is ellipsoid. }
+	\label{fig:shrinking_music_notes}
+\end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingEllipsoidsToleranceTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingEllipsoidsToleranceTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for different $\varepsilon$ values, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Each feature from the feature vector has been standardized. Minimum volume enclosing figure is ellipsoid. }
+\end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingEllipsoidsElementsRemovalTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingEllipsoidsElementsRemovalTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for increasingly smaller data sets, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Minimum volume enclosing figure is ellipsoid. }
+\end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingEllipsoidsElementsRemovalTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingEllipsoidsElementsRemovalTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for increasingly smaller data sets, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Each feature from the feature vector has been standardized. Minimum volume enclosing figure is ellipsoid. }
+\end{figure}
+
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingRectanglesToleranceTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingRectanglesToleranceTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for different $\varepsilon$ values, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Minimum volume enclosing figure is hyper rectangle. }
+\end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingRectanglesToleranceTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingRectanglesToleranceTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for different $\varepsilon$ values, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Each feature from the feature vector has been standardized. Minimum volume enclosing figure is hyper rectangle. }
+\end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingRectanglesElementsRemovalTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES/DIGITS_ShrinkingRectanglesElementsRemovalTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for increasingly smaller data sets, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Minimum volume enclosing figure is hyper rectangle. }
+\end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingRectanglesElementsRemovalTraining.png}
+	\hspace{12pt}
+	\includegraphics[width=0.80\textwidth]{Figures/charts/MUSIC_NOTES_STANDARIZED/DIGITS_ShrinkingRectanglesElementsRemovalTest.png}
+	\caption{ Identification, Classification and Rejection rates obtained for increasingly smaller data sets, tested on training and test data consisting of 20 native classes and 1 foreign one, representing musical notes. Each feature from the feature vector has been standardized. Minimum volume enclosing figure is hyper rectangle. }
+\end{figure}
