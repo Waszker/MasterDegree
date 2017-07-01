@@ -1,6 +1,6 @@
 \section{Classifier Arrays} \ \label{classifier_arrays}
 
-Another approach towards classification with rejection option problem involves chaining classifiers trained on certain, very specific data. The array of those classifiers serves as a voting mechanism where every new and unknown pattern is presented to each classifier in this array and the classification (or rejection) decision is made based on the overall achieved score. All classifiers inside the array are binary ones but can be divided into two groups:
+Another approach towards classification with rejection option problem involves chaining classifiers trained on certain, very specific data. The array of those classifiers serves as a voting mechanism where every new and unknown pattern is presented to each classifier in this array and the classification (or rejection) decision is made based on the overall achieved score\cite{PiotrWaszkiewicz2}. All classifiers inside the array are binary ones but can be divided into two groups:
 \begin{itemize}
 	\item one-versus-all - those classifiers are trained on two sets, where the first one consists of training patterns from certain class, and the second one is made of all patterns from the training set except for those from this certain class
 	\item one-versus-one - every classifier is trained on training patterns from two different classes

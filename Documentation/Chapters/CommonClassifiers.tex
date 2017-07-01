@@ -59,7 +59,12 @@ The SVM algorithm has been widely applied in the biological and other sciences. 
 
 It is worth noting though that in some cases, where the number of features is much greater than the number of samples, using support vector machines can give poor results, and is not cost-efficient when calculating probability estimates. 
 
-\section{Random Forest}
+\section{Ensemble methods}
+
+In statistics and machine learning, ensemble methods use multiple learning algorithms to obtain better predictive performance than could be obtained from any of the constituent learning algorithms alone. The main principle behind ensemble methods, in general, is that a~group of ``weak learners'' can come together to form a~``strong learner''\cite{EnsembleMethods}. Random forest is one of the most popular ensemble methods. In the random forest algorithm~\cite{Breiman2001} the weak learners are decision trees, which are used to predict class labels. 
+
+\subsection{Decision Tree}
+A decision tree is a decision support tool that uses a tree-like graph for classification issue. Each graph node performs a test on an attribute of the provided pattern and sends it to its child node via a branch that represents the outcome of the test. Each leaf in a decision tree represents a certain class label. In other words for a~feature vector representing one pattern a~decision tree calculates its class label by dividing value space into two or more subspaces. More precisely, input data are entered at the top of the tree and as it traverses down the tree the data get bucketed into smaller subsets. An optimal decision tree is defined as a tree that accounts for most of the data, while minimizing the number of levels\cite{RQuinlan}. Given training vectors $x_{i} \in \mathbb{R}^{n}, i=1,\dots,l$ and a label vector $y \in \mathbb{R}^{l}$ a decision tree recursively partitions the space such that samples with the same labels are grouped together. Let the data at node $m$ be represented by $Q$. For each candidate, the node splits data using $\theta = (j, t|{m})$ consisting of a feature $j$ and threshold $t_{m}$, then partitions it into $Q_{left}(\theta)$ and $Q_{right}(\theta)$ subsets. \[Q_{left}(\theta) = (x, y)|x_{j} <= t_{m}\] \[Q_{right}(\theta) = Q \setminus Q_{left}(\theta) \] The parameter $\theta$ is selected in such way that minimises the number of incorrectly divided patterns from $Q$.
 
 \begin{figure}[htp]
 	\centering
@@ -68,7 +73,7 @@ It is worth noting though that in some cases, where the number of features is mu
 	\label{fig:rf_visualization_funny}\vspace{-3pt}
 \end{figure}
 
-Random forest is a~popular ensemble method. The main principle behind ensemble methods, in general, is that a~group of ``weak learners'' can come together to form a~``strong learner''\cite{EnsembleMethods}. In the random forest algorithm~\cite{Breiman2001} the weak learners are decision trees, which are used to predict class labels. A decision tree is a decision support tool that uses a tree-like graph for classification issue. Each graph node performs a test on an attribute of the provided pattern and sends it to its child node via a branch that represents the outcome of the test. Each leaf in a decision tree represents a certain class label. In other words for a~feature vector representing one pattern a~decision tree calculates its class label by dividing value space into two or more subspaces. More precisely, input data are entered at the top of the tree and as it traverses down the tree the data get bucketed into smaller subsets. An optimal decision tree is defined as a tree that accounts for most of the data, while minimizing the number of levels\cite{RQuinlan}. There are many advantages of using decision trees. Their results are easy to interpret and visualize in form of a graph, they can handle multi class classification problems and perform well even if its assumptions are somewhat violated by the true model from which the data were generated. On the other hand, the main drawbacks connected to their usage consist of overfitting problem caused by creating too complex trees on a very complicated data, and instability caused by small variations in the data that might result in a completely different tree being generated. That last problem is easily mitigated by ensembling set of decision trees into a random forest. 
+There are many advantages of using decision trees. Their results are easy to interpret and visualize in form of a graph, they can handle multi class classification problems and perform well even if its assumptions are somewhat violated by the true model from which the data were generated. On the other hand, the main drawbacks connected to their usage consist of overfitting problem caused by creating too complex trees on a very complicated data (a tree with few samples in high dimensional space is very likely to overfit - getting the right ration of samples to number of features is essential), and instability caused by small variations in the data that might result in a completely different tree being generated. That last problem is easily mitigated by ensembling set of decision trees into a random forest, which can be seen as a way of averaging multiple decision trees, trained on different parts of the same set, with the goal of reducing their variance\cite{StatisticalLearning}.
 
 \begin{figure}[htp]
 	\centering
@@ -77,7 +82,21 @@ Random forest is a~popular ensemble method. The main principle behind ensemble m
 	\label{fig:rf_visualization}\vspace{-3pt}
 \end{figure}
 
-In the random forest a~large number of classification trees is formed, which altogether serve as a~classifier. In order to grow each tree, a~random selection of rows from the training set is drawn. Random sampling with replacement is also called bootstrap sampling. In addition, when constructing trees for a~random forest at each node $m$~variables out of the set of all input variables are randomly selected, and the best split on these $m$~is used to split the node. After a~relatively large number of trees is generated, they vote for the most popular class. Some of the parameters used for improving classification rates that are available within scikit-learn package random forest implementation:
+\subsection{Random Forests}
+
+In the random forest a~large number of classification trees is formed, which altogether serve as a~classifier. In order to grow each tree, a~random selection of rows from the training set is drawn. Each tree is grown as follows\cite{RandomForestWebpage}:
+
+\begin{itemize}
+	
+	\item If the number of cases in the training set is $N$, sample $N$ cases at random - but with replacement, from the original data. This sample will be the training set for growing the tree.
+	\item If there are $M$ input variables, a number $m<<M$ is specified such that at each node, m variables are selected at random out of the M and the best split on these m is used to split the node. The value of m is held constant during the forest growing.
+	\item Each tree is grown to the largest extent possible. There is no pruning.
+	
+\end{itemize}
+
+After a~relatively large number of trees is generated, they vote for the most popular class. The voting is done by applying input vector to all trees within the forest and collecting their classification results. The forest chooses the classification having the most votes (over all the trees in the forest). It was shown that the random forest error rate depends on correlation between any two trees in the forest (increased correlation results in bigger error), and the strength of each individual tree (increasing the strength of the trees decreases forest's error rate), where strength of tree is defined by low error rate.
+
+Some of the parameters used for improving classification rates that are available within scikit-learn package random forest implementation:
 
 \begin{itemize}
 	\item $n\_estimators$ - determines number of trees used by random forest in the algorithm
